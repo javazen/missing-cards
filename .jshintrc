@@ -1,0 +1,15 @@
+{
+  "esversion": 6,
+  "browser": true,
+  "mocha": true,
+  "elision": true,
+  "jquery": true,
+  "multistr": true,
+  "undef": true,
+  "validthis": true,
+  "-W080": true,
+  "globals": {
+    "chai": true,
+    "console": true
+  }
+}

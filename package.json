@@ -1,0 +1,22 @@
+{
+  "name": "missing-cards",
+  "version": "1.0.0",
+  "description": "simply webpage to list all combinations of the specified cards missing in one suit",
+  "main": "index.js",
+  "scripts": {
+    "jshint": "jshint ./src/*.js; true",
+    "jshint-test": "jshint ./test/spec/**.js; true",
+    "eslint": "eslint ./src/*.js; true",
+    "eslint-test": "eslint ./test/spec/**.js; true",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^7.14.0",
+    "mocha": "^8.2.1"
+  }
+}
