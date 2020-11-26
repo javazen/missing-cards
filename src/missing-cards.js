@@ -7,41 +7,39 @@
   let origTableHTML;
   let wholeArray;
   
-  // for use in mocha.html
   if (TESTING) {
-  var expect = chai.expect;
-  suite('Testing test.js', function() {
+    // for use in mocha.html
+    var expect = chai.expect;
+    suite('Testing test.js', function() {
 
-    suite('Testing choose', function() {
-      var chooseArray = [
-        {arr:['a'], n: 0, result: []},
-        {arr:['a'], n: 1, result: [ ['a'] ]},
-        {arr:['a', 'b'], n: 0, result: []},
-        {arr:['a', 'b'], n: 1, result: [ ['a'], ['b'] ]},
-        {arr:['a', 'b'], n: 2, result: [ ['a', 'b'] ]},
-        {arr:['a', 'b', 'c'], n: 0, result: []},
-        {arr:['a', 'b', 'c'], n: 1, result: [ ['a'], ['b'], ['c'] ]},
-        {arr:['a', 'b', 'c'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['b', 'c'] ]},
-        {arr:['a', 'b', 'c'], n: 3, result: [ ['a', 'b', 'c'] ]},
-        {arr:['a', 'b', 'c', 'd'], n: 0, result: []},
-        {arr:['a', 'b', 'c', 'd'], n: 1, result: [ ['a'], ['b'], ['c'], ['d'] ]},
-        {arr:['a', 'b', 'c', 'd'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd'] ]},
-        {arr:['a', 'b', 'c', 'd'], n: 3, result: [ ['a', 'b', 'c'], ['a', 'b', 'd'], ['a', 'c', 'd'], ['b', 'c', 'd'] ]},
-      ];
-      chooseArray.forEach(function(aTest) {
-        aTest.testName = aTest.arr + ' n= ' + aTest.n +  ' -> ' + JSON.stringify(aTest.result);
-      });
-      chooseArray.forEach(function(aTest) {
-        test(aTest.testName, function() {
-          var chosen = choose(aTest.arr, aTest.n);
-          expect(chosen).to.deep.equal(aTest.result);
+      suite('Testing choose', function() {
+        var chooseArray = [
+          {arr:['a'], n: 0, result: []},
+          {arr:['a'], n: 1, result: [ ['a'] ]},
+          {arr:['a', 'b'], n: 0, result: []},
+          {arr:['a', 'b'], n: 1, result: [ ['a'], ['b'] ]},
+          {arr:['a', 'b'], n: 2, result: [ ['a', 'b'] ]},
+          {arr:['a', 'b', 'c'], n: 0, result: []},
+          {arr:['a', 'b', 'c'], n: 1, result: [ ['a'], ['b'], ['c'] ]},
+          {arr:['a', 'b', 'c'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['b', 'c'] ]},
+          {arr:['a', 'b', 'c'], n: 3, result: [ ['a', 'b', 'c'] ]},
+          {arr:['a', 'b', 'c', 'd'], n: 0, result: []},
+          {arr:['a', 'b', 'c', 'd'], n: 1, result: [ ['a'], ['b'], ['c'], ['d'] ]},
+          {arr:['a', 'b', 'c', 'd'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd'] ]},
+          {arr:['a', 'b', 'c', 'd'], n: 3, result: [ ['a', 'b', 'c'], ['a', 'b', 'd'], ['a', 'c', 'd'], ['b', 'c', 'd'] ]},
+        ];
+        chooseArray.forEach(function(aTest) {
+          aTest.testName = aTest.arr + ' n= ' + aTest.n +  ' -> ' + JSON.stringify(aTest.result);
+        });
+        chooseArray.forEach(function(aTest) {
+          test(aTest.testName, function() {
+            var chosen = choose(aTest.arr, aTest.n);
+            expect(chosen).to.deep.equal(aTest.result);
+          });
         });
       });
     });
-  });
   }
-  
-  // TODO accept "K 10 3" also
   
   document.addEventListener("DOMContentLoaded", function(event) {
     if (TRACE) console.log('DOMContentLoaded');
@@ -128,9 +126,10 @@
         newArray.push([item]);
       });
     } else { // len > n and n > 1
-      let firstElement = arr[0]; // 'K'
-      let remainingArr = arr.slice(1); // ['J']
-      let theRestArray = (remainingArr.length === 1) ? remainingArr.slice() : choose(remainingArr, n-1); // 
+      let firstElement = arr[0];
+      let remainingArr = arr.slice(1);
+      // let theRestArray = (remainingArr.length === 1) ? remainingArr.slice() : choose(remainingArr, n-1); // this special case is not actually needed
+      let theRestArray = choose(remainingArr, n-1);
       newArray = theRestArray.map(function(el) {
         let tempArray = [firstElement];
         return tempArray.concat(el);
@@ -143,16 +142,6 @@
     
     return newArray;
   }
-  
-  // augmentArray([b0, b1], [x,y,z]) -> [ [b0, b1, x], [b0, b1, y], [b0, b1, z] ]
-  // function augmentArray(baseArray, additionalElements) {
-  //   let newArray = additionalElements.map( function(el) {
-  //     let tempArray = baseArray.slice();
-  //     tempArray.push(el);
-  //     return tempArray;
-  //   } );
-  //   return newArray;
-  // }
   
   function subtract(wholeArray, partToSubtract) {
     let newArray = [];
