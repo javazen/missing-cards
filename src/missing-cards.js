@@ -3,47 +3,56 @@
   
   const TRACE = true;
   const DEBUG = true;
-  const TESTING = false;
+  let TESTING = false;
   let origTableHTML;
   let wholeArray;
   
-  if (TESTING) {
-    // for use in mocha.html
-    var expect = chai.expect;
-    suite('Testing test.js', function() {
+  document.addEventListener("DOMContentLoaded", function(event) {
+    if (TRACE) console.log('DOMContentLoaded');
+    
+    // see if we are in TESTING node
+    let ss = document.styleSheets;
+    for (let i = 0; i < ss.length; i++) {
+      let href = ss[i].href;
+      if (href.endsWith("mocha.css")) {
+        TESTING = true;
+        break;
+      }
+    }
+    
+    if (TESTING) {
+      // for use in mocha.html
+      var expect = chai.expect;
+      suite('Testing test.js', function() {
 
-      suite('Testing choose', function() {
-        var chooseArray = [
-          {arr:['a'], n: 0, result: []},
-          {arr:['a'], n: 1, result: [ ['a'] ]},
-          {arr:['a', 'b'], n: 0, result: []},
-          {arr:['a', 'b'], n: 1, result: [ ['a'], ['b'] ]},
-          {arr:['a', 'b'], n: 2, result: [ ['a', 'b'] ]},
-          {arr:['a', 'b', 'c'], n: 0, result: []},
-          {arr:['a', 'b', 'c'], n: 1, result: [ ['a'], ['b'], ['c'] ]},
-          {arr:['a', 'b', 'c'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['b', 'c'] ]},
-          {arr:['a', 'b', 'c'], n: 3, result: [ ['a', 'b', 'c'] ]},
-          {arr:['a', 'b', 'c', 'd'], n: 0, result: []},
-          {arr:['a', 'b', 'c', 'd'], n: 1, result: [ ['a'], ['b'], ['c'], ['d'] ]},
-          {arr:['a', 'b', 'c', 'd'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd'] ]},
-          {arr:['a', 'b', 'c', 'd'], n: 3, result: [ ['a', 'b', 'c'], ['a', 'b', 'd'], ['a', 'c', 'd'], ['b', 'c', 'd'] ]},
-        ];
-        chooseArray.forEach(function(aTest) {
-          aTest.testName = aTest.arr + ' n= ' + aTest.n +  ' -> ' + JSON.stringify(aTest.result);
-        });
-        chooseArray.forEach(function(aTest) {
-          test(aTest.testName, function() {
-            var chosen = choose(aTest.arr, aTest.n);
-            expect(chosen).to.deep.equal(aTest.result);
+        suite('Testing choose', function() {
+          var chooseArray = [
+            {arr:['a'], n: 0, result: []},
+            {arr:['a'], n: 1, result: [ ['a'] ]},
+            {arr:['a', 'b'], n: 0, result: []},
+            {arr:['a', 'b'], n: 1, result: [ ['a'], ['b'] ]},
+            {arr:['a', 'b'], n: 2, result: [ ['a', 'b'] ]},
+            {arr:['a', 'b', 'c'], n: 0, result: []},
+            {arr:['a', 'b', 'c'], n: 1, result: [ ['a'], ['b'], ['c'] ]},
+            {arr:['a', 'b', 'c'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['b', 'c'] ]},
+            {arr:['a', 'b', 'c'], n: 3, result: [ ['a', 'b', 'c'] ]},
+            {arr:['a', 'b', 'c', 'd'], n: 0, result: []},
+            {arr:['a', 'b', 'c', 'd'], n: 1, result: [ ['a'], ['b'], ['c'], ['d'] ]},
+            {arr:['a', 'b', 'c', 'd'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd'] ]},
+            {arr:['a', 'b', 'c', 'd'], n: 3, result: [ ['a', 'b', 'c'], ['a', 'b', 'd'], ['a', 'c', 'd'], ['b', 'c', 'd'] ]},
+          ];
+          chooseArray.forEach(function(aTest) {
+            aTest.testName = aTest.arr + ' n= ' + aTest.n +  ' -> ' + JSON.stringify(aTest.result);
+          });
+          chooseArray.forEach(function(aTest) {
+            test(aTest.testName, function() {
+              var chosen = choose(aTest.arr, aTest.n);
+              expect(chosen).to.deep.equal(aTest.result);
+            });
           });
         });
       });
-    });
-  }
-  
-  document.addEventListener("DOMContentLoaded", function(event) {
-    if (TRACE) console.log('DOMContentLoaded');
-    if (!TESTING) {
+    } else {
       let outputBtn = document.getElementById("outputBtn");
       outputBtn.addEventListener('click', handleOutputBtn);
       let outputTable = document.getElementById("outputTable");

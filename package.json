@@ -1,7 +1,7 @@
 {
   "name": "missing-cards",
   "version": "1.0.0",
-  "description": "simply webpage to list all combinations of the specified cards missing in one suit",
+  "description": "list all combinations of the specified cards missing in one suit",
   "main": "index.js",
   "scripts": {
     "jshint": "jshint ./src/*.js; true",
