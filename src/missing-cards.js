@@ -57,6 +57,17 @@
       outputBtn.addEventListener('click', handleOutputBtn);
       let outputTable = document.getElementById("outputTable");
       origTableHTML = outputTable.innerHTML;
+      
+      // Also do it if user presses ENTER
+      let inputField = document.getElementById("cardsStr");
+      inputField.addEventListener("keyup", function(e) {
+        e.preventDefault();
+        const isEnter = e.code === "Enter" || e.key === "Enter";
+        // e.which = e.which || e.keyCode; // old deprecated way
+        if (isEnter) {
+          outputBtn.click();
+        }
+      });
     }
   });
 
