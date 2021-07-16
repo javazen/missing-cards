@@ -3,12 +3,43 @@
   <head>
     <meta charset="utf-8">
     <title>missing-cards</title>
+    <link rel="icon" href="data:;base64,=">
     <script src="src/missing-cards.js"></script>
   </head>
   <body>
     <h2>The Missing Cards, where are they?</h2> <br />
     <label for="cardsStr">Missing Cards: <input id="cardsStr" type="text" value="K, J, 3, 2" /></label>
     <button id="outputBtn" title="list all possibilities">output</button>
+    <br />
+    <br />
+
+    <!-- 
+    <div id="constraintsWrapper">
+      <details>
+        <summary>Constraints</summary>
+        <div id="distConstraintsWrapper">
+          <details>
+            <summary>Distribution</summary>
+            <button id="distConstraintsAddBtn" title="add a new Distribution constraint">+</button>
+          </details>
+        </div>
+        <div id="pointsConstraintsWrapper">
+          <details>
+            <summary>Specific Cards</summary>
+            <button id="specificCardsConstraintsAddBtn" title="add a new Specific Card constraint">+</button>
+          </details>
+        </div>
+        <div id="cardsConstraintsWrapper">
+          <details>
+            <summary>Point Count</summary>
+            <button id="pointCountConstraintsAddBtn" title="add a new Point Count constraint">+</button>
+          </details>
+        </div>
+      </details>
+    </div>
+    <br />
+        -->
+
     <div id="outputTableWrapper">
     <table id="outputTable">
       <thead>
