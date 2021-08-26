@@ -6,6 +6,7 @@
   let TESTING = false;
   let origTableHTML;
   let wholeArray;
+  let constraintsObj;
   
   document.addEventListener("DOMContentLoaded", function(event) {
     if (TRACE) console.log('DOMContentLoaded');
@@ -78,6 +79,7 @@
     if (cardsStrValue) {
       wholeArray = processInputString(cardsStrValue);
       let possiblesArray = getPossibilities(wholeArray);
+      possiblesArray = constrainPossibles(possiblesArray, constraintsObj);
       if (possiblesArray) listPossibilities(possiblesArray);
     }
   }
@@ -99,6 +101,14 @@
     }
     return possiblesArray;
   }
+
+  function constrainPossibles(possiblesArray, constraintsObj) {
+    let newArray = possiblesArray.slice();
+    if (constraintsObj) {
+
+    }
+    return newArray;
+  }
   
   function listPossibilities(possiblesArray) {
     let outputTable = document.getElementById("outputTable");
@@ -117,7 +127,7 @@
       let eastTextNode = document.createTextNode(eastStr);
       newCell2.appendChild(eastTextNode);
     }
-    // Hack because in getPossibilities, the last entry is not added.  concat(str, []) does nothing
+    // Hack because in getPossibilities, the last entry is not added.  possiblesArray.concat([]) does nothing
     if (possiblesArray.length > 0 && possiblesArray[0].length) {
       let newRow = tableBody.insertRow();
       let newCell = newRow.insertCell();
@@ -145,7 +155,7 @@
       arr.forEach((item, i) => {
         newArray.push([item]);
       });
-    } else { // len > n and n > 1
+    } else { // 1 < n < len
       let firstElement = arr[0];
       let remainingArr = arr.slice(1);
       // let theRestArray = (remainingArr.length === 1) ? remainingArr.slice() : choose(remainingArr, n-1); // this special case is not actually needed
