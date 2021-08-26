@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>missing-cards</title>
     <link rel="icon" href="data:;base64,=">
+    <link rel="stylesheet" href="css/index.css" />
     <script src="src/missing-cards.js"></script>
   </head>
   <body>
@@ -13,46 +14,54 @@
     <br />
     <br />
 
-    <!-- 
-    <div id="constraintsWrapper">
-      <details>
-        <summary>Constraints</summary>
-        <div id="distConstraintsWrapper">
-          <details>
-            <summary>Distribution</summary>
-            <button id="distConstraintsAddBtn" title="add a new Distribution constraint">+</button>
-          </details>
+    <div class="flex-container">
+      <div id="outputTableWrapper" class="flex-child">
+        <h3>Results</h3>
+        <table id="outputTable">
+          <thead>
+            <tr>
+              <td><input type="text" value="West" /></td>
+              <td><input type="text" value="East" /></td>
+            </tr>
+          </thead>
+          <tbody id="outputTableBody">
+          </tbody>
+        </table>
         </div>
-        <div id="pointsConstraintsWrapper">
-          <details>
-            <summary>Specific Cards</summary>
-            <button id="specificCardsConstraintsAddBtn" title="add a new Specific Card constraint">+</button>
-          </details>
+        <div id="right-side" class="flex-child">
+          <h3>Filter Results</h3>
+          <div id="distConstraintsWrapper">
+            <label class="switch">
+              <input type="checkbox" id="enableDistConst">
+              <span class="slider round"></span>
+            </label>
+            <!-- 
+            <span>
+              <label>Distribution <input type="checkbox" name="enable"> </label>
+            </span>
+             -->
+            <span>
+              Distribution:
+              <select name="opponent" id="whichOpponent" class="margin-left-20">
+                <option value="West">West</option>
+                <option value="East">East</option>
+                <option value="Either">Either</option>
+              </select>
+              must have <input id="distConstCards"></input> cards 
+              <select name="match" id="whichMatch">
+                <option value="exactly">exactly</option>
+                <option value="orMore">or more</option>
+                <option value="orFewer">or fewer</option>
+              </select>
+            </span>
         </div>
-        <div id="cardsConstraintsWrapper">
-          <details>
-            <summary>Point Count</summary>
-            <button id="pointCountConstraintsAddBtn" title="add a new Point Count constraint">+</button>
-          </details>
-        </div>
-      </details>
+          <div id="constraintsWrapper">
+            <details>
+              <summary>Constraints</summary>
+            </details>
+          </div>    
+        </div>    
     </div>
-    <br />
-        -->
-
-    <div id="outputTableWrapper">
-    <table id="outputTable">
-      <thead>
-        <tr>
-          <td><input type="text" value="West" /></td>
-          <td><input type="text" value="East" /></td>
-        </tr>
-      </thead>
-      <tbody id="outputTableBody">
-      </tbody>
-    </table>
-    </div>
-
 
   </body>
 </html>
