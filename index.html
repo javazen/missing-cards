@@ -28,18 +28,13 @@
           </tbody>
         </table>
         </div>
-        <div id="right-side" class="flex-child">
+
+        <div id="right-side" class="flex-child initiallyHidden">
           <h3>Filter Results</h3>
           <div id="distConstraintsWrapper">
-            <label class="switch">
-              <input type="checkbox" id="enableDistConst">
-              <span class="slider round"></span>
+            <label for="switch" class="gui-switch">
+              <input type="checkbox" role="switch" id="switch">
             </label>
-            <!-- 
-            <span>
-              <label>Distribution <input type="checkbox" name="enable"> </label>
-            </span>
-             -->
             <span>
               Distribution:
               <select name="opponent" id="whichOpponent" class="margin-left-20">

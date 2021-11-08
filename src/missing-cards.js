@@ -4,17 +4,18 @@
   const TRACE = true;
   const DEBUG = true;
   let TESTING = false;
+  // let CONSTRAINTS = false;
+  // let constraintsObj;
   let origTableHTML;
   let wholeArray;
-  let constraintsObj;
   
   document.addEventListener("DOMContentLoaded", function(event) {
     if (TRACE) console.log('DOMContentLoaded');
     
     // see if we are in TESTING node
-    let ss = document.styleSheets;
+    const ss = document.styleSheets;
     for (let i = 0; i < ss.length; i++) {
-      let href = ss[i].href;
+      const href = ss[i].href;
       if (href.endsWith("mocha.css")) {
         TESTING = true;
         break;
@@ -23,11 +24,11 @@
     
     if (TESTING) {
       // for use in mocha.html
-      var expect = chai.expect;
-      suite('Testing test.js', function() {
+      let expect = chai.expect;
+      suite('Testing missing-cards.js', function() {
 
         suite('Testing choose', function() {
-          var chooseArray = [
+          const chooseArray = [
             {arr:['a'], n: 0, result: []},
             {arr:['a'], n: 1, result: [ ['a'] ]},
             {arr:['a', 'b'], n: 0, result: []},
@@ -47,20 +48,48 @@
           });
           chooseArray.forEach(function(aTest) {
             test(aTest.testName, function() {
-              var chosen = choose(aTest.arr, aTest.n);
+              const chosen = choose(aTest.arr, aTest.n);
               expect(chosen).to.deep.equal(aTest.result);
             });
           });
         });
+
+        suite('Testing getOutputRowsArray', function() {
+          const outputRowsArray = [
+            {str:'a', result: [ ['A', '---'], ['---', 'A'] ]},
+            {str:'K,Q', result: [ ['K, Q', '---'], ['K', 'Q'], ['Q', 'K'], ['---', 'K, Q'] ]},
+            {str:'K,Q, 3', result: [ 
+              ['K, Q, 3', '---'], 
+              ['K, Q', '3'], 
+              ['K, 3', 'Q'], 
+              ['Q, 3', 'K'], 
+              ['K', 'Q, 3'], 
+              ['Q', 'K, 3'], 
+              ['3', 'K, Q'], 
+              ['---', 'K, Q, 3'] ]},
+          ];
+          outputRowsArray.forEach(function(aTest) {
+            aTest.testName = aTest.str + ' -> ' + JSON.stringify(aTest.result);
+          });
+          outputRowsArray.forEach(function(aTest) {
+            test(aTest.testName, function() {
+              const wholeArray = processInputString(aTest.str);
+              const possibilitiesArray = getPossibilities(wholeArray);
+              const outputRows = getOutputRowsArray(wholeArray, possibilitiesArray);
+              expect(outputRows).to.deep.equal(aTest.result);
+            });
+          });
+        });
+
       });
     } else {
-      let outputBtn = document.getElementById("outputBtn");
+      const outputBtn = document.getElementById("outputBtn");
       outputBtn.addEventListener('click', handleOutputBtn);
-      let outputTable = document.getElementById("outputTable");
+      const outputTable = document.getElementById("outputTable");
       origTableHTML = outputTable.innerHTML;
       
       // Also do it if user presses ENTER
-      let inputField = document.getElementById("cardsStr");
+      const inputField = document.getElementById("cardsStr");
       inputField.addEventListener("keyup", function(e) {
         e.preventDefault();
         const isEnter = e.code === "Enter" || e.key === "Enter";
@@ -73,14 +102,15 @@
   });
 
   function handleOutputBtn(e) {
-    let cardsStrInput = document.getElementById("cardsStr");
-    let cardsStrValue = (cardsStrInput && cardsStrInput.value) ? cardsStrInput.value : '';
+    const cardsStrInput = document.getElementById("cardsStr");
+    const cardsStrValue = (cardsStrInput && cardsStrInput.value) ? cardsStrInput.value : '';
     if (DEBUG) console.log(cardsStrValue);
     if (cardsStrValue) {
       wholeArray = processInputString(cardsStrValue);
-      let possiblesArray = getPossibilities(wholeArray);
-      possiblesArray = constrainPossibles(possiblesArray, constraintsObj);
-      if (possiblesArray) listPossibilities(possiblesArray);
+      const possiblesArray = getPossibilities(wholeArray);
+      const outputRowsArray = getOutputRowsArray(wholeArray, possiblesArray);
+      // possibleOutputRowsArray = constrainPossibles(outputRowsArray, constraintsObj);
+      if (possiblesArray) listPossibilities(outputRowsArray);
     }
   }
   
@@ -96,47 +126,51 @@
     let possiblesArray = [];
     
     for (let i=cardArray.length; i>=0; i--) {
-      let arrN = choose(cardArray, i);
-      possiblesArray = possiblesArray.concat(arrN);
+      const arrN = choose(cardArray, i);
+      if (arrN.length)  
+        possiblesArray = possiblesArray.concat(arrN);
+      else
+        possiblesArray.push(arrN);
     }
     return possiblesArray;
   }
 
-  function constrainPossibles(possiblesArray, constraintsObj) {
-    let newArray = possiblesArray.slice();
-    if (constraintsObj) {
-
+  function getOutputRowsArray(wholeArray, possiblesArray) {
+    let newArray = [];
+    for (let i=0; i<possiblesArray.length; i++) {
+      const westArr = (possiblesArray[i] && possiblesArray[i].length && possiblesArray[i].length > 0) ? possiblesArray[i] : [];
+      const westStr = (westArr && westArr.length) ? westArr.join(', ') : '---';
+      const theRest = subtract(wholeArray, possiblesArray[i]);
+      const eastArr = (theRest && theRest.length && theRest.length > 0) ? theRest : [];
+      const eastStr = (eastArr && eastArr.length) ? eastArr.join(', ') : '---';
+      const outputRow = [westStr, eastStr];
+      newArray.push(outputRow);
     }
     return newArray;
   }
   
-  function listPossibilities(possiblesArray) {
-    let outputTable = document.getElementById("outputTable");
+  // function constrainPossibles(outputRowsArray, constraintsObj) {
+  //   let newArray = outputRowsArray.slice();
+  //   if (constraintsObj) {
+      
+  //   }
+  //   return newArray;
+  // }
+  
+  function listPossibilities(outputRowsArray) {
+    const outputTable = document.getElementById("outputTable");
     outputTable.innerHTML = origTableHTML; // clear all but the headers
     
-    let tableBody = document.getElementById("outputTableBody");
-    for (let i=0; i<possiblesArray.length; i++) {
-      let newRow = tableBody.insertRow();
-      let newCell = newRow.insertCell();
-      let westStr = (possiblesArray[i] && possiblesArray[i].length && possiblesArray[i].length > 0) ? possiblesArray[i] : '---';
-      let westTextNode = document.createTextNode(westStr);
+    const tableBody = document.getElementById("outputTableBody");
+    for (let i=0; i<outputRowsArray.length; i++) {
+      const newRow = tableBody.insertRow();
+      const newCell = newRow.insertCell();
+      const westStr = outputRowsArray[i][0];
+      const westTextNode = document.createTextNode(westStr);
       newCell.appendChild(westTextNode);
-      let newCell2 = newRow.insertCell();
-      let theRest = subtract(wholeArray, possiblesArray[i]);
-      let eastStr = (theRest && theRest.length && theRest.length > 0) ? theRest : '---';
-      let eastTextNode = document.createTextNode(eastStr);
-      newCell2.appendChild(eastTextNode);
-    }
-    // Hack because in getPossibilities, the last entry is not added.  possiblesArray.concat([]) does nothing
-    if (possiblesArray.length > 0 && possiblesArray[0].length) {
-      let newRow = tableBody.insertRow();
-      let newCell = newRow.insertCell();
-      let westStr = '---';
-      let westTextNode = document.createTextNode(westStr);
-      newCell.appendChild(westTextNode);
-      let newCell2 = newRow.insertCell();
-      let eastStr = wholeArray.slice();
-      let eastTextNode = document.createTextNode(eastStr);
+      const newCell2 = newRow.insertCell();
+      const eastStr = outputRowsArray[i][1];
+      const eastTextNode = document.createTextNode(eastStr);
       newCell2.appendChild(eastTextNode);
     }
   }
@@ -156,10 +190,10 @@
         newArray.push([item]);
       });
     } else { // 1 < n < len
-      let firstElement = arr[0];
-      let remainingArr = arr.slice(1);
+      const firstElement = arr[0];
+      const remainingArr = arr.slice(1);
       // let theRestArray = (remainingArr.length === 1) ? remainingArr.slice() : choose(remainingArr, n-1); // this special case is not actually needed
-      let theRestArray = choose(remainingArr, n-1);
+      const theRestArray = choose(remainingArr, n-1);
       newArray = theRestArray.map(function(el) {
         let tempArray = [firstElement];
         return tempArray.concat(el);
@@ -177,7 +211,7 @@
     let newArray = [];
     
     for (let i=0; i<wholeArray.length; i++) {
-      let el = wholeArray[i];
+      const el = wholeArray[i];
       if (!partToSubtract.includes(el)) {
         newArray.push(el);
       }
