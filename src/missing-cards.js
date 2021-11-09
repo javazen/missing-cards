@@ -4,8 +4,10 @@
   const TRACE = true;
   const DEBUG = true;
   let TESTING = false;
-  // let CONSTRAINTS = false;
-  // let constraintsObj;
+  let CONSTRAINTS = false;
+  const WEST = 0;
+  const EAST = 1;
+  let constraintsObj;
   let origTableHTML;
   let wholeArray;
   
@@ -22,6 +24,8 @@
       outputBtn.addEventListener('click', handleOutputBtn);
       const outputTable = document.getElementById("outputTable");
       origTableHTML = outputTable.innerHTML;
+
+      constraintsObj = {};
       
       // Also do it if user presses ENTER
       const inputField = document.getElementById("cardsStr");
@@ -83,17 +87,21 @@
       suite('Testing getOutputRowsArray', function() {
         const outputRowsArray = [
           // NB: getOutputRowsArray uppercases all letters, adds spaces after commas
-          {str:'a', result: [ ['A', '---'], ['---', 'A'] ]},
-          {str:'K,Q', result: [ ['K, Q', '---'], ['K', 'Q'], ['Q', 'K'], ['---', 'K, Q'] ]},
+          {str:'a', result: [ [['A'], []], [[], ['A']] ]},
+          {str:'K,Q', result: [ 
+            [['K', 'Q'], []], 
+            [['K'], ['Q']], 
+            [['Q'], ['K']], 
+            [[], ['K', 'Q']] ]},
           {str:'K,Q, 3', result: [ 
-            ['K, Q, 3', '---'], 
-            ['K, Q', '3'], 
-            ['K, 3', 'Q'], 
-            ['Q, 3', 'K'], 
-            ['K', 'Q, 3'], 
-            ['Q', 'K, 3'], 
-            ['3', 'K, Q'], 
-            ['---', 'K, Q, 3'] ]},
+            [['K', 'Q', '3'], []], 
+            [['K', 'Q'], ['3']], 
+            [['K', '3'], ['Q']], 
+            [['Q', '3'], ['K']], 
+            [['K'], ['Q', '3']], 
+            [['Q'], ['K', '3']], 
+            [['3'], ['K', 'Q']], 
+            [[], ['K', 'Q', '3']] ]},
         ];
         outputRowsArray.forEach(function(aTest) {
           aTest.testName = aTest.str + ' -> ' + JSON.stringify(aTest.result);
@@ -119,7 +127,7 @@
       wholeArray = processInputString(cardsStrValue);
       const possiblesArray = getPossibilities(wholeArray);
       const outputRowsArray = getOutputRowsArray(wholeArray, possiblesArray);
-      // possibleOutputRowsArray = constrainPossibles(outputRowsArray, constraintsObj);
+      const possibleOutputRowsArray = constrainPossibles(outputRowsArray, constraintsObj);
       if (possiblesArray) listPossibilities(outputRowsArray);
     }
   }
@@ -149,23 +157,27 @@
     let newArray = [];
     for (let i=0; i<possiblesArray.length; i++) {
       const westArr = (possiblesArray[i] && possiblesArray[i].length && possiblesArray[i].length > 0) ? possiblesArray[i] : [];
-      const westStr = (westArr && westArr.length) ? westArr.join(', ') : '---';
       const theRest = subtract(wholeArray, possiblesArray[i]);
       const eastArr = (theRest && theRest.length && theRest.length > 0) ? theRest : [];
-      const eastStr = (eastArr && eastArr.length) ? eastArr.join(', ') : '---';
-      const outputRow = [westStr, eastStr];
+      const outputRow = [westArr, eastArr];
       newArray.push(outputRow);
     }
     return newArray;
   }
   
-  // function constrainPossibles(outputRowsArray, constraintsObj) {
-  //   let newArray = outputRowsArray.slice();
-  //   if (constraintsObj) {
-      
-  //   }
-  //   return newArray;
-  // }
+  function constrainPossibles(outputRowsArray, constraintsObj) {
+    let newArray = outputRowsArray.slice();
+    if (CONSTRAINTS && constraintsObj) {
+      for (let i=outputRowsArray.length-1; i>=0; i--) {
+        let row = outputRowsArray[i];
+        let rowObj = analyzeRow(row);
+        if (!allowed(constraintsObj, rowObj)) {
+          newArray.splice(i, 1);
+        }
+      }
+    }
+    return newArray;
+  }
   
   function listPossibilities(outputRowsArray) {
     const outputTable = document.getElementById("outputTable");
@@ -175,11 +187,13 @@
     for (let i=0; i<outputRowsArray.length; i++) {
       const newRow = tableBody.insertRow();
       const newCell = newRow.insertCell();
-      const westStr = outputRowsArray[i][0];
+      const westArr = outputRowsArray[i][WEST];
+      const westStr = (westArr && westArr.length) ? westArr.join(', ') : '---';
       const westTextNode = document.createTextNode(westStr);
       newCell.appendChild(westTextNode);
       const newCell2 = newRow.insertCell();
-      const eastStr = outputRowsArray[i][1];
+      const eastArr = outputRowsArray[i][EAST];
+      const eastStr = (eastArr && eastArr.length) ? eastArr.join(', ') : '---';
       const eastTextNode = document.createTextNode(eastStr);
       newCell2.appendChild(eastTextNode);
     }
@@ -228,6 +242,21 @@
     }
     
     return newArray;
+  }
+
+  function analyzeRow(row) {
+    let rowObj = {raw:{}};
+    rowObj.raw.westArr = row[WEST];
+    rowObj.raw.eastArr = row[EAST];
+    
+    
+    return rowObj;
+  }
+
+  function allowed(constraintsObj, rowObj) {
+    let westArr = rowObj.raw.westArr;
+    // westArr.includes()
+    return !westArr.includes('K');  // HACK to test splice
   }
   
 }());
