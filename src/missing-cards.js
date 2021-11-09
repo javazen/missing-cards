@@ -16,65 +16,7 @@
     checkTestingMode();
     
     if (TESTING) {
-      // for use in mocha.html
-      let expect = chai.expect;
-      suite('Testing missing-cards.js', function() {
-
-        suite('Testing choose', function() {
-          const chooseArray = [
-            {arr:['a'], n: 0, result: []},
-            {arr:['a'], n: 1, result: [ ['a'] ]},
-            {arr:['a', 'b'], n: 0, result: []},
-            {arr:['a', 'b'], n: 1, result: [ ['a'], ['b'] ]},
-            {arr:['a', 'b'], n: 2, result: [ ['a', 'b'] ]},
-            {arr:['a', 'b', 'c'], n: 0, result: []},
-            {arr:['a', 'b', 'c'], n: 1, result: [ ['a'], ['b'], ['c'] ]},
-            {arr:['a', 'b', 'c'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['b', 'c'] ]},
-            {arr:['a', 'b', 'c'], n: 3, result: [ ['a', 'b', 'c'] ]},
-            {arr:['a', 'b', 'c', 'd'], n: 0, result: []},
-            {arr:['a', 'b', 'c', 'd'], n: 1, result: [ ['a'], ['b'], ['c'], ['d'] ]},
-            {arr:['a', 'b', 'c', 'd'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd'] ]},
-            {arr:['a', 'b', 'c', 'd'], n: 3, result: [ ['a', 'b', 'c'], ['a', 'b', 'd'], ['a', 'c', 'd'], ['b', 'c', 'd'] ]},
-          ];
-          chooseArray.forEach(function(aTest) {
-            aTest.testName = aTest.arr + ' n= ' + aTest.n +  ' -> ' + JSON.stringify(aTest.result);
-          });
-          chooseArray.forEach(function(aTest) {
-            test(aTest.testName, function() {
-              const chosen = choose(aTest.arr, aTest.n);
-              expect(chosen).to.deep.equal(aTest.result);
-            });
-          });
-        });
-
-        suite('Testing getOutputRowsArray', function() {
-          const outputRowsArray = [
-            {str:'a', result: [ ['A', '---'], ['---', 'A'] ]},
-            {str:'K,Q', result: [ ['K, Q', '---'], ['K', 'Q'], ['Q', 'K'], ['---', 'K, Q'] ]},
-            {str:'K,Q, 3', result: [ 
-              ['K, Q, 3', '---'], 
-              ['K, Q', '3'], 
-              ['K, 3', 'Q'], 
-              ['Q, 3', 'K'], 
-              ['K', 'Q, 3'], 
-              ['Q', 'K, 3'], 
-              ['3', 'K, Q'], 
-              ['---', 'K, Q, 3'] ]},
-          ];
-          outputRowsArray.forEach(function(aTest) {
-            aTest.testName = aTest.str + ' -> ' + JSON.stringify(aTest.result);
-          });
-          outputRowsArray.forEach(function(aTest) {
-            test(aTest.testName, function() {
-              const wholeArray = processInputString(aTest.str);
-              const possibilitiesArray = getPossibilities(wholeArray);
-              const outputRows = getOutputRowsArray(wholeArray, possibilitiesArray);
-              expect(outputRows).to.deep.equal(aTest.result);
-            });
-          });
-        });
-
-      });
+      runUnitTests();
     } else {
       const outputBtn = document.getElementById("outputBtn");
       outputBtn.addEventListener('click', handleOutputBtn);
@@ -103,6 +45,70 @@
         break;
       }
     }
+  }
+
+  function runUnitTests() {
+    if (TRACE) console.log('runUnitTests');
+    // for use in mocha.html
+    const expect = chai.expect;
+    suite('Testing missing-cards.js', function() {
+
+      suite('Testing choose', function() {
+        const chooseArray = [
+          {arr:['a'], n: 0, result: []},
+          {arr:['a'], n: 1, result: [ ['a'] ]},
+          {arr:['a', 'b'], n: 0, result: []},
+          {arr:['a', 'b'], n: 1, result: [ ['a'], ['b'] ]},
+          {arr:['a', 'b'], n: 2, result: [ ['a', 'b'] ]},
+          {arr:['a', 'b', 'c'], n: 0, result: []},
+          {arr:['a', 'b', 'c'], n: 1, result: [ ['a'], ['b'], ['c'] ]},
+          {arr:['a', 'b', 'c'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['b', 'c'] ]},
+          {arr:['a', 'b', 'c'], n: 3, result: [ ['a', 'b', 'c'] ]},
+          {arr:['a', 'b', 'c', 'd'], n: 0, result: []},
+          {arr:['a', 'b', 'c', 'd'], n: 1, result: [ ['a'], ['b'], ['c'], ['d'] ]},
+          {arr:['a', 'b', 'c', 'd'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd'] ]},
+          {arr:['a', 'b', 'c', 'd'], n: 3, result: [ ['a', 'b', 'c'], ['a', 'b', 'd'], ['a', 'c', 'd'], ['b', 'c', 'd'] ]},
+        ];
+        chooseArray.forEach(function(aTest) {
+          aTest.testName = aTest.arr + ' n= ' + aTest.n +  ' -> ' + JSON.stringify(aTest.result);
+        });
+        chooseArray.forEach(function(aTest) {
+          test(aTest.testName, function() {
+            const chosen = choose(aTest.arr, aTest.n);
+            expect(chosen).to.deep.equal(aTest.result);
+          });
+        });
+      });
+
+      suite('Testing getOutputRowsArray', function() {
+        const outputRowsArray = [
+          // NB: getOutputRowsArray uppercases all letters, adds spaces after commas
+          {str:'a', result: [ ['A', '---'], ['---', 'A'] ]},
+          {str:'K,Q', result: [ ['K, Q', '---'], ['K', 'Q'], ['Q', 'K'], ['---', 'K, Q'] ]},
+          {str:'K,Q, 3', result: [ 
+            ['K, Q, 3', '---'], 
+            ['K, Q', '3'], 
+            ['K, 3', 'Q'], 
+            ['Q, 3', 'K'], 
+            ['K', 'Q, 3'], 
+            ['Q', 'K, 3'], 
+            ['3', 'K, Q'], 
+            ['---', 'K, Q, 3'] ]},
+        ];
+        outputRowsArray.forEach(function(aTest) {
+          aTest.testName = aTest.str + ' -> ' + JSON.stringify(aTest.result);
+        });
+        outputRowsArray.forEach(function(aTest) {
+          test(aTest.testName, function() {
+            const wholeArray = processInputString(aTest.str);
+            const possibilitiesArray = getPossibilities(wholeArray);
+            const outputRows = getOutputRowsArray(wholeArray, possibilitiesArray);
+            expect(outputRows).to.deep.equal(aTest.result);
+          });
+        });
+      });
+
+    });
   }
 
   function handleOutputBtn(e) {
