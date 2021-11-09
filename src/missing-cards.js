@@ -12,15 +12,8 @@
   document.addEventListener("DOMContentLoaded", function(event) {
     if (TRACE) console.log('DOMContentLoaded');
     
-    // see if we are in TESTING node
-    const ss = document.styleSheets;
-    for (let i = 0; i < ss.length; i++) {
-      const href = ss[i].href;
-      if (href.endsWith("mocha.css")) {
-        TESTING = true;
-        break;
-      }
-    }
+    // set TESTING node flag if it's mocha.html
+    checkTestingMode();
     
     if (TESTING) {
       // for use in mocha.html
@@ -100,6 +93,17 @@
       });
     }
   });
+
+  function checkTestingMode() {
+    const ss = document.styleSheets;
+    for (let i = 0; i < ss.length; i++) {
+      const href = ss[i].href;
+      if (href.endsWith("mocha.css")) {
+        TESTING = true;
+        break;
+      }
+    }
+  }
 
   function handleOutputBtn(e) {
     const cardsStrInput = document.getElementById("cardsStr");
