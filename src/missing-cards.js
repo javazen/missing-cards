@@ -3,11 +3,22 @@
   
   const TRACE = true;
   const DEBUG = true;
+  const DEBUG_ANALYZE_ROW = false;
   let TESTING = false;
-  let CONSTRAINTS = false;
-  const WEST = 0;
-  const EAST = 1;
-  let constraintsObj;
+  let CONSTRAINTS = true;
+  const WESTARR = 0;
+  const EASTARR = 1;
+  const WESTHAND = 0;
+  const EASTHAND = 1;
+  const ANYHAND = 2;
+  // const EVERYHAND = 3; //  probably not needed
+  const MODE_AT_MOST = 0;
+  const MODE_AT_LEAST = 1;
+  const MODE_EXACTLY = 2;
+  let constraintsObj = { 
+    dist:{check:true, hand:ANYHAND, mode:MODE_AT_MOST, count:2}, 
+    points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
+    cards:{check:true, west:'K', east:'3'} };
   let origTableHTML;
   let wholeArray;
   
@@ -25,8 +36,8 @@
       const outputTable = document.getElementById("outputTable");
       origTableHTML = outputTable.innerHTML;
 
-      constraintsObj = {};
-      
+      // fill constraintsObj from UI, set handlers to allow changes
+
       // Also do it if user presses ENTER
       const inputField = document.getElementById("cardsStr");
       inputField.addEventListener("keyup", function(e) {
@@ -128,7 +139,7 @@
       const possiblesArray = getPossibilities(wholeArray);
       const outputRowsArray = getOutputRowsArray(wholeArray, possiblesArray);
       const possibleOutputRowsArray = constrainPossibles(outputRowsArray, constraintsObj);
-      if (possiblesArray) listPossibilities(outputRowsArray);
+      if (possiblesArray) listPossibilities(possibleOutputRowsArray);
     }
   }
   
@@ -165,6 +176,7 @@
     return newArray;
   }
   
+  // Remove all the rows that do not pass the tests in constraintsObj
   function constrainPossibles(outputRowsArray, constraintsObj) {
     let newArray = outputRowsArray.slice();
     if (CONSTRAINTS && constraintsObj) {
@@ -187,12 +199,12 @@
     for (let i=0; i<outputRowsArray.length; i++) {
       const newRow = tableBody.insertRow();
       const newCell = newRow.insertCell();
-      const westArr = outputRowsArray[i][WEST];
+      const westArr = outputRowsArray[i][WESTARR];
       const westStr = (westArr && westArr.length) ? westArr.join(', ') : '---';
       const westTextNode = document.createTextNode(westStr);
       newCell.appendChild(westTextNode);
       const newCell2 = newRow.insertCell();
-      const eastArr = outputRowsArray[i][EAST];
+      const eastArr = outputRowsArray[i][EASTARR];
       const eastStr = (eastArr && eastArr.length) ? eastArr.join(', ') : '---';
       const eastTextNode = document.createTextNode(eastStr);
       newCell2.appendChild(eastTextNode);
@@ -244,19 +256,129 @@
     return newArray;
   }
 
+  const pointsArray = {
+    'A': 4,
+    'K': 3,
+    'Q': 2,
+    'J': 1
+  };
+
   function analyzeRow(row) {
     let rowObj = {raw:{}};
-    rowObj.raw.westArr = row[WEST];
-    rowObj.raw.eastArr = row[EAST];
-    
+    const westArr = row[WESTARR];
+    const eastArr = row[EASTARR];
+    rowObj.raw.westArr = westArr;
+    rowObj.raw.eastArr = eastArr;
+
+    rowObj.west = {dist:westArr.length, points:0};
+    rowObj.east = {dist:eastArr.length, points:0};
+    rowObj.max = {dist:Math.max(rowObj.west.dist, rowObj.east.dist), points:0};
+    // rowObj.min = {dist:Math.min(rowObj.west.dist, rowObj.east.dist), points:0};
+
+    rowObj.west.points = countPoints(westArr);
+    rowObj.east.points = countPoints(eastArr);
+    rowObj.max.points = Math.max(rowObj.west.points, rowObj.east.points);
+    // rowObj.min.points = Math.min(rowObj.west.points, rowObj.east.points);
+
+    if (DEBUG_ANALYZE_ROW) debugOutputRow(rowObj);
     
     return rowObj;
   }
 
+  function countPoints(cardArr) {
+    let totalPoints = 0;
+    for (let i=0; i<cardArr.length; i++) {
+      const card = cardArr[i];
+      const points = (pointsArray[card]) ? pointsArray[card] : 0;
+      totalPoints += points;
+    }
+    return totalPoints;
+  }
+  
+  function debugOutputRow(rowObj) {
+    console.log('     row: westArr= ' + rowObj.raw.westArr + ' eastArr= ' + rowObj.raw.eastArr);
+    console.log('W: dist= ' + rowObj.west.dist + ' points= ' + rowObj.west.points);
+    console.log('E: dist= ' + rowObj.east.dist + ' points= ' + rowObj.east.points);
+    console.log('max: dist= ' + rowObj.max.dist + ' points= ' + rowObj.max.points);
+    // console.log('min: dist= ' + rowObj.min.dist + ' points= ' + rowObj.min.points);
+  }
+  
   function allowed(constraintsObj, rowObj) {
-    let westArr = rowObj.raw.westArr;
-    // westArr.includes()
-    return !westArr.includes('K');  // HACK to test splice
+    const distOK = allowedDist(constraintsObj.dist, rowObj);
+    const pointsOK = allowedPoints(constraintsObj.points, rowObj);
+    const cardsOK = allowedGivenKnownCards(constraintsObj.cards, rowObj);
+    return distOK && pointsOK && cardsOK;
+  }
+  
+  // distObj is the part of constraintObj that specifies the distribution constraint
+  function allowedDist(distObj, rowObj) {
+    let ok = true;
+    if (distObj.check) {
+      const hand = distObj.hand;
+      const mode = distObj.mode;
+      const count = distObj.count;
+      if (mode === MODE_AT_MOST) {
+        if (hand === WESTHAND) ok = rowObj.west.dist <= count;
+        else if (hand === EASTHAND) ok = rowObj.east.dist <= count;
+        else if (hand === ANYHAND) ok = rowObj.max.dist <= count;
+      } else if (mode === MODE_AT_LEAST) {
+        if (hand === WESTHAND) ok = rowObj.west.dist >= count;
+        else if (hand === EASTHAND) ok = rowObj.east.dist >= count;
+        else if (hand === ANYHAND) ok = rowObj.max.dist >= count;
+      } else if (mode === MODE_EXACTLY) {
+        if (hand === WESTHAND) ok = rowObj.west.dist === count;
+        else if (hand === EASTHAND) ok = rowObj.east.dist === count;
+      }
+  
+    }
+    return ok;
+  }
+  
+  // pointsObj is the part of constraintObj that specifies the points constraint
+  function allowedPoints(pointsObj, rowObj) {
+    let ok = true;
+    if (pointsObj.check) {
+      const hand = pointsObj.hand;
+      const mode = pointsObj.mode;
+      const count = pointsObj.count;
+      if (mode === MODE_AT_MOST) {
+        if (hand === WESTHAND) ok = rowObj.west.points <= count;
+        else if (hand === EASTHAND) ok = rowObj.east.points <= count;
+        else if (hand === ANYHAND) ok = rowObj.max.points <= count;
+      } else if (mode === MODE_AT_LEAST) {
+        if (hand === WESTHAND) ok = rowObj.west.points >= count;
+        else if (hand === EASTHAND) ok = rowObj.east.points >= count;
+        else if (hand === ANYHAND) ok = rowObj.max.points >= count;
+      } else if (mode === MODE_EXACTLY) {
+        if (hand === WESTHAND) ok = rowObj.west.points === count;
+        else if (hand === EASTHAND) ok = rowObj.east.points === count;
+      }
+      }
+    return ok;
+  }
+  
+  // pointsObj is the part of constraintObj that specifies the points constraint
+  function allowedGivenKnownCards(cardsObj, rowObj) {
+    let ok = true;
+    if (cardsObj.check) {
+      const westArr = processInputString(cardsObj.west);
+      const eastArr = processInputString(cardsObj.east);
+      const rowWestArr = rowObj.raw.westArr;
+      const rowEastArr = rowObj.raw.eastArr;
+      const westCardsOK = westArr.every(function(el) {
+        return rowWestArr.includes(el);
+      });
+      const eastCardsOK = eastArr.every(function(el) {
+        return rowEastArr.includes(el);
+      });
+      ok = ok && westCardsOK && eastCardsOK;
+    }
+    return ok;
   }
   
 }());
+
+// let constraintsObj = { 
+//   dist:{check:true, hand:ANYHAND, mode:MODE_AT_MOST, count:2}, 
+//   points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
+//   cards:{check:true, west:'K', east:'3'} };
