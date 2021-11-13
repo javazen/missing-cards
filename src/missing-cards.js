@@ -304,60 +304,34 @@
   }
   
   function allowed(constraintsObj, rowObj) {
-    const distOK = allowedDist(constraintsObj.dist, rowObj);
-    const pointsOK = allowedPoints(constraintsObj.points, rowObj);
+    const distOK = allowedInternal(constraintsObj.dist, rowObj, 'dist');
+    const pointsOK = allowedInternal(constraintsObj.points, rowObj, 'points');
     const cardsOK = allowedGivenKnownCards(constraintsObj.cards, rowObj);
     return distOK && pointsOK && cardsOK;
   }
-  
-  // distObj is the part of constraintObj that specifies the distribution constraint
-  function allowedDist(distObj, rowObj) {
+    
+  function allowedInternal(obj, rowObj, field) {
     let ok = true;
-    if (distObj.check) {
-      const hand = distObj.hand;
-      const mode = distObj.mode;
-      const count = distObj.count;
+    if (obj.check) {
+      const hand = obj.hand;
+      const mode = obj.mode;
+      const count = obj.count;
       if (mode === MODE_AT_MOST) {
-        if (hand === WESTHAND) ok = rowObj.west.dist <= count;
-        else if (hand === EASTHAND) ok = rowObj.east.dist <= count;
-        else if (hand === ANYHAND) ok = rowObj.max.dist <= count;
+        if (hand === WESTHAND) ok = rowObj.west[field] <= count;
+        else if (hand === EASTHAND) ok = rowObj.east[field] <= count;
+        else if (hand === ANYHAND) ok = rowObj.max[field] <= count;
       } else if (mode === MODE_AT_LEAST) {
-        if (hand === WESTHAND) ok = rowObj.west.dist >= count;
-        else if (hand === EASTHAND) ok = rowObj.east.dist >= count;
-        else if (hand === ANYHAND) ok = rowObj.max.dist >= count;
+        if (hand === WESTHAND) ok = rowObj.west[field] >= count;
+        else if (hand === EASTHAND) ok = rowObj.east[field] >= count;
+        else if (hand === ANYHAND) ok = rowObj.max[field] >= count;
       } else if (mode === MODE_EXACTLY) {
-        if (hand === WESTHAND) ok = rowObj.west.dist === count;
-        else if (hand === EASTHAND) ok = rowObj.east.dist === count;
+        if (hand === WESTHAND) ok = rowObj.west[field] === count;
+        else if (hand === EASTHAND) ok = rowObj.east[field] === count;
       }
-  
     }
     return ok;
   }
   
-  // pointsObj is the part of constraintObj that specifies the points constraint
-  function allowedPoints(pointsObj, rowObj) {
-    let ok = true;
-    if (pointsObj.check) {
-      const hand = pointsObj.hand;
-      const mode = pointsObj.mode;
-      const count = pointsObj.count;
-      if (mode === MODE_AT_MOST) {
-        if (hand === WESTHAND) ok = rowObj.west.points <= count;
-        else if (hand === EASTHAND) ok = rowObj.east.points <= count;
-        else if (hand === ANYHAND) ok = rowObj.max.points <= count;
-      } else if (mode === MODE_AT_LEAST) {
-        if (hand === WESTHAND) ok = rowObj.west.points >= count;
-        else if (hand === EASTHAND) ok = rowObj.east.points >= count;
-        else if (hand === ANYHAND) ok = rowObj.max.points >= count;
-      } else if (mode === MODE_EXACTLY) {
-        if (hand === WESTHAND) ok = rowObj.west.points === count;
-        else if (hand === EASTHAND) ok = rowObj.east.points === count;
-      }
-      }
-    return ok;
-  }
-  
-  // pointsObj is the part of constraintObj that specifies the points constraint
   function allowedGivenKnownCards(cardsObj, rowObj) {
     let ok = true;
     if (cardsObj.check) {
