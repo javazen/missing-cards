@@ -11,14 +11,14 @@
   const WESTHAND = 0;
   const EASTHAND = 1;
   const ANYHAND = 2;
-  // const EVERYHAND = 3; //  probably not needed
   const MODE_AT_MOST = 0;
   const MODE_AT_LEAST = 1;
   const MODE_EXACTLY = 2;
+  const MILLISECONDS = 1000;
   let constraintsObj = { 
-    dist:{check:true, hand:ANYHAND, mode:MODE_AT_MOST, count:2}, 
+    dist:{check:false, hand:ANYHAND, mode:MODE_AT_MOST, count:2}, 
     points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
-    cards:{check:true, west:'K', east:'3'} };
+    cards:{check:false, west:'K', east:'3'} };
   let origTableHTML;
   let wholeArray;
   
@@ -31,104 +31,69 @@
     if (TESTING) {
       runUnitTests();
     } else {
-      const outputBtn = document.getElementById("outputBtn");
-      outputBtn.addEventListener('click', handleOutputBtn);
-      const outputTable = document.getElementById("outputTable");
-      origTableHTML = outputTable.innerHTML;
-
-      // fill constraintsObj from UI, set handlers to allow changes
-
-      // Also do it if user presses ENTER
-      const inputField = document.getElementById("cardsStr");
-      inputField.addEventListener("keyup", function(e) {
-        e.preventDefault();
-        const isEnter = e.code === "Enter" || e.key === "Enter";
-        // e.which = e.which || e.keyCode; // old deprecated way
-        if (isEnter) {
-          outputBtn.click();
-        }
-      });
+      setup();
     }
   });
 
-  function checkTestingMode() {
-    const ss = document.styleSheets;
-    for (let i = 0; i < ss.length; i++) {
-      const href = ss[i].href;
-      if (href.endsWith("mocha.css")) {
-        TESTING = true;
-        break;
+  function setup() {
+    const outputBtn = document.getElementById("outputBtn");
+    outputBtn.addEventListener('click', handleOutputBtn);
+    const outputTable = document.getElementById("outputTable");
+    origTableHTML = outputTable.innerHTML;
+
+    // fill constraintsObj from UI, set handlers to allow changes
+    setupCB("enableDist", constraintsObj.dist);
+    setupCB("enablePoints", constraintsObj.points);
+    setupCB("enableCards", constraintsObj.cards);
+
+
+    // ENTER when within the cardsStr input should be equivalent to clicking the Output button
+    const inputField = document.getElementById("cardsStr");
+    inputField.addEventListener("keyup", function(e) {
+      e.preventDefault();
+      const isEnter = e.code === "Enter" || e.key === "Enter";
+      // e.which = e.which || e.keyCode; // old deprecated way
+      if (isEnter) {
+        outputBtn.click();
       }
-    }
-  }
-
-  function runUnitTests() {
-    if (TRACE) console.log('runUnitTests');
-    // for use in mocha.html
-    const expect = chai.expect;
-    suite('Testing missing-cards.js', function() {
-
-      suite('Testing choose', function() {
-        const chooseArray = [
-          {arr:['a'], n: 0, result: []},
-          {arr:['a'], n: 1, result: [ ['a'] ]},
-          {arr:['a', 'b'], n: 0, result: []},
-          {arr:['a', 'b'], n: 1, result: [ ['a'], ['b'] ]},
-          {arr:['a', 'b'], n: 2, result: [ ['a', 'b'] ]},
-          {arr:['a', 'b', 'c'], n: 0, result: []},
-          {arr:['a', 'b', 'c'], n: 1, result: [ ['a'], ['b'], ['c'] ]},
-          {arr:['a', 'b', 'c'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['b', 'c'] ]},
-          {arr:['a', 'b', 'c'], n: 3, result: [ ['a', 'b', 'c'] ]},
-          {arr:['a', 'b', 'c', 'd'], n: 0, result: []},
-          {arr:['a', 'b', 'c', 'd'], n: 1, result: [ ['a'], ['b'], ['c'], ['d'] ]},
-          {arr:['a', 'b', 'c', 'd'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd'] ]},
-          {arr:['a', 'b', 'c', 'd'], n: 3, result: [ ['a', 'b', 'c'], ['a', 'b', 'd'], ['a', 'c', 'd'], ['b', 'c', 'd'] ]},
-        ];
-        chooseArray.forEach(function(aTest) {
-          aTest.testName = aTest.arr + ' n= ' + aTest.n +  ' -> ' + JSON.stringify(aTest.result);
-        });
-        chooseArray.forEach(function(aTest) {
-          test(aTest.testName, function() {
-            const chosen = choose(aTest.arr, aTest.n);
-            expect(chosen).to.deep.equal(aTest.result);
-          });
-        });
-      });
-
-      suite('Testing getOutputRowsArray', function() {
-        const outputRowsArray = [
-          // NB: getOutputRowsArray uppercases all letters, adds spaces after commas
-          {str:'a', result: [ [['A'], []], [[], ['A']] ]},
-          {str:'K,Q', result: [ 
-            [['K', 'Q'], []], 
-            [['K'], ['Q']], 
-            [['Q'], ['K']], 
-            [[], ['K', 'Q']] ]},
-          {str:'K,Q, 3', result: [ 
-            [['K', 'Q', '3'], []], 
-            [['K', 'Q'], ['3']], 
-            [['K', '3'], ['Q']], 
-            [['Q', '3'], ['K']], 
-            [['K'], ['Q', '3']], 
-            [['Q'], ['K', '3']], 
-            [['3'], ['K', 'Q']], 
-            [[], ['K', 'Q', '3']] ]},
-        ];
-        outputRowsArray.forEach(function(aTest) {
-          aTest.testName = aTest.str + ' -> ' + JSON.stringify(aTest.result);
-        });
-        outputRowsArray.forEach(function(aTest) {
-          test(aTest.testName, function() {
-            const wholeArray = processInputString(aTest.str);
-            const possibilitiesArray = getPossibilities(wholeArray);
-            const outputRows = getOutputRowsArray(wholeArray, possibilitiesArray);
-            expect(outputRows).to.deep.equal(aTest.result);
-          });
-        });
-      });
-
     });
+    // after user stops typing, adjust the constraints
+    let timeout = null;
+    inputField.addEventListener('keyup', function (e) {
+      // Clear the timeout if it has already been set.
+      // This will prevent the previous task from executing
+      // if it has been less than <MILLISECONDS>
+      clearTimeout(timeout);
+
+      // Make a new timeout set to go off in MILLISECONDS
+      timeout = setTimeout(function () {
+          updateUI(inputField);
+      }, MILLISECONDS);
+    });
+}
+
+function setupCB(id, obj) {
+  const cb = document.getElementById(id);
+  const isChecked = cb.checked;
+  obj.check = isChecked;
+  cb.addEventListener('click', handleCB);
+  function handleCB(e) {
+    if (DEBUG) console.log('handleCB called for ' + id);
+    const cb = document.getElementById(id);
+    const isChecked = cb.checked;
+    obj.check = isChecked;
   }
+}
+
+
+function updateUI(cardsStrInput) {
+  const cardsStrValue = (cardsStrInput && cardsStrInput.value) ? cardsStrInput.value : '';
+  if (cardsStrValue) {
+    const wholeArray = processInputString(cardsStrValue);
+    if (DEBUG) console.log('Whole Array:', wholeArray);
+  }
+}
+
 
   function handleOutputBtn(e) {
     const cardsStrInput = document.getElementById("cardsStr");
@@ -349,7 +314,91 @@
     }
     return ok;
   }
+
   
+  //
+  // Testing functions
+  //
+  function checkTestingMode() {
+    const ss = document.styleSheets;
+    for (let i = 0; i < ss.length; i++) {
+      const href = ss[i].href;
+      if (href.endsWith("mocha.css")) {
+        TESTING = true;
+        break;
+      }
+    }
+  }
+
+  function runUnitTests() {
+    if (TRACE) console.log('runUnitTests');
+    // for use in mocha.html
+    const expect = chai.expect;
+    suite('Testing missing-cards.js', function() {
+
+      suite('Testing choose', function() {
+        const chooseArray = [
+          {arr:['a'], n: 0, result: []},
+          {arr:['a'], n: 1, result: [ ['a'] ]},
+          {arr:['a', 'b'], n: 0, result: []},
+          {arr:['a', 'b'], n: 1, result: [ ['a'], ['b'] ]},
+          {arr:['a', 'b'], n: 2, result: [ ['a', 'b'] ]},
+          {arr:['a', 'b', 'c'], n: 0, result: []},
+          {arr:['a', 'b', 'c'], n: 1, result: [ ['a'], ['b'], ['c'] ]},
+          {arr:['a', 'b', 'c'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['b', 'c'] ]},
+          {arr:['a', 'b', 'c'], n: 3, result: [ ['a', 'b', 'c'] ]},
+          {arr:['a', 'b', 'c', 'd'], n: 0, result: []},
+          {arr:['a', 'b', 'c', 'd'], n: 1, result: [ ['a'], ['b'], ['c'], ['d'] ]},
+          {arr:['a', 'b', 'c', 'd'], n: 2, result: [ ['a', 'b'], ['a', 'c'], ['a', 'd'], ['b', 'c'], ['b', 'd'], ['c', 'd'] ]},
+          {arr:['a', 'b', 'c', 'd'], n: 3, result: [ ['a', 'b', 'c'], ['a', 'b', 'd'], ['a', 'c', 'd'], ['b', 'c', 'd'] ]},
+        ];
+        chooseArray.forEach(function(aTest) {
+          aTest.testName = aTest.arr + ' n= ' + aTest.n +  ' -> ' + JSON.stringify(aTest.result);
+        });
+        chooseArray.forEach(function(aTest) {
+          test(aTest.testName, function() {
+            const chosen = choose(aTest.arr, aTest.n);
+            expect(chosen).to.deep.equal(aTest.result);
+          });
+        });
+      });
+
+      suite('Testing getOutputRowsArray', function() {
+        const outputRowsArray = [
+          // NB: getOutputRowsArray uppercases all letters, adds spaces after commas
+          {str:'a', result: [ [['A'], []], [[], ['A']] ]},
+          {str:'K,Q', result: [ 
+            [['K', 'Q'], []], 
+            [['K'], ['Q']], 
+            [['Q'], ['K']], 
+            [[], ['K', 'Q']] ]},
+          {str:'K,Q, 3', result: [ 
+            [['K', 'Q', '3'], []], 
+            [['K', 'Q'], ['3']], 
+            [['K', '3'], ['Q']], 
+            [['Q', '3'], ['K']], 
+            [['K'], ['Q', '3']], 
+            [['Q'], ['K', '3']], 
+            [['3'], ['K', 'Q']], 
+            [[], ['K', 'Q', '3']] ]},
+        ];
+        outputRowsArray.forEach(function(aTest) {
+          aTest.testName = aTest.str + ' -> ' + JSON.stringify(aTest.result);
+        });
+        outputRowsArray.forEach(function(aTest) {
+          test(aTest.testName, function() {
+            const wholeArray = processInputString(aTest.str);
+            const possibilitiesArray = getPossibilities(wholeArray);
+            const outputRows = getOutputRowsArray(wholeArray, possibilitiesArray);
+            expect(outputRows).to.deep.equal(aTest.result);
+          });
+        });
+      });
+
+    });
+  }
+
+
 }());
 
 // let constraintsObj = { 

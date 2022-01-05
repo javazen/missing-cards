@@ -32,30 +32,62 @@
         <div id="right-side" class="flex-child initiallyHidden">
           <h3>Filter Results</h3>
           <div id="distConstraintsWrapper">
-            <label for="switch" class="gui-switch">
-              <input type="checkbox" role="switch" id="switch">
-            </label>
             <span>
-              Distribution:
-              <select name="opponent" id="whichOpponent" class="margin-left-20">
+              <label for="enableDist">
+                <input type="checkbox" id="enableDist">
+              </label>
+                Distribution:
+              <select name="opponent" id="whichOpponentForDist">
                 <option value="West">West</option>
                 <option value="East">East</option>
-                <option value="Either">Either</option>
+                <option value="Both">Both</option>
               </select>
-              must have <input id="distConstCards"></input> cards 
-              <select name="match" id="whichMatch">
-                <option value="exactly">exactly</option>
-                <option value="orMore">or more</option>
-                <option value="orFewer">or fewer</option>
+              must have
+              <select name="match" id="whichMatchForDist">
+                <option value="0">at most</option>
+                <option value="1">at least</option>
+                <option value="2">exactly</option>
               </select>
+              <input id="distCount" class="numcardsTextInput">
+              cards
             </span>
-        </div>
-          <div id="constraintsWrapper">
-            <details>
-              <summary>Constraints</summary>
-            </details>
-          </div>    
-        </div>    
+            <br />
+            <span>
+              <label for="enablePoints">
+                <input type="checkbox" id="enablePoints">
+              </label>
+                Point Count:
+              <select name="opponent" id="whichOpponentForPoints">
+                <option value="West">West</option>
+                <option value="East">East</option>
+                <option value="Both">Both</option>
+              </select>
+              must have
+              <select name="match" id="whichMatchForPoints">
+                <option value="0">at most</option>
+                <option value="1">at least</option>
+                <option value="2">exactly</option>
+              </select>
+              <input id="pointsCount" class="numcardsTextInput">
+              points
+            </span>
+            <br />
+            <span>
+              <label for="enableCards">
+                <input type="checkbox" id="enableCards">
+              </label>
+                Specific Cards:
+            </span>
+            <br />
+            <span class="indent22">
+              West must have at least these cards
+              <input id="westMustHaveCards">
+            </span>
+            <br />
+            <span class="indent22">
+              East must have at least these cards
+              <input id="eastMustHaveCards">
+            </span>
     </div>
 
   </body>
