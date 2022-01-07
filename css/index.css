@@ -1,9 +1,13 @@
 .flex-container {
-    display: flex;
+  display: flex;
 }
 
 .flex-child {
   flex: 1;
+}
+
+.initiallyHidden {
+  display: none;
 }
 
 .numcardsTextInput {

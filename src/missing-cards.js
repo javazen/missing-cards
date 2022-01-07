@@ -6,15 +6,20 @@
   const DEBUG_ANALYZE_ROW = false;
   let TESTING = false;
   let CONSTRAINTS = true;
+  const MILLISECONDS = 1000;
+
   const WESTARR = 0;
   const EASTARR = 1;
+  
   const WESTHAND = 0;
   const EASTHAND = 1;
   const ANYHAND = 2;
+
   const MODE_AT_MOST = 0;
   const MODE_AT_LEAST = 1;
   const MODE_EXACTLY = 2;
-  const MILLISECONDS = 1000;
+
+  // initial default state
   let constraintsObj = { 
     dist:{check:false, hand:ANYHAND, mode:MODE_AT_MOST, count:2}, 
     points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
@@ -41,12 +46,7 @@
     const outputTable = document.getElementById("outputTable");
     origTableHTML = outputTable.innerHTML;
 
-    // fill constraintsObj from UI, set handlers to allow changes
-    setupCB("enableDist", constraintsObj.dist);
-    setupCB("enablePoints", constraintsObj.points);
-    setupCB("enableCards", constraintsObj.cards);
-
-
+    
     // ENTER when within the cardsStr input should be equivalent to clicking the Output button
     const inputField = document.getElementById("cardsStr");
     inputField.addEventListener("keyup", function(e) {
@@ -70,7 +70,16 @@
           updateUI(inputField);
       }, MILLISECONDS);
     });
-}
+
+    if (CONSTRAINTS) {
+      document.getElementById('right-side').style.display = "block";
+    }
+
+    // fill constraintsObj from UI, set handlers to allow changes
+    setupCB("enableDist", constraintsObj.dist);
+    setupCB("enablePoints", constraintsObj.points);
+    setupCB("enableCards", constraintsObj.cards);
+  }
 
 function setupCB(id, obj) {
   const cb = document.getElementById(id);
