@@ -11,13 +11,13 @@
   const WESTARR = 0;
   const EASTARR = 1;
   
-  const WESTHAND = 0;
-  const EASTHAND = 1;
-  const ANYHAND = 2;
+  const WESTHAND = 'West';
+  const EASTHAND = 'East';
+  const ANYHAND = 'Both';
 
-  const MODE_AT_MOST = 0;
-  const MODE_AT_LEAST = 1;
-  const MODE_EXACTLY = 2;
+  const MODE_AT_MOST = 'at most';
+  const MODE_AT_LEAST = 'at least';
+  const MODE_EXACTLY = 'exactly';
 
   // initial default state
   let constraintsObj = { 
@@ -79,6 +79,34 @@
     setupCB("enableDist", constraintsObj.dist);
     setupCB("enablePoints", constraintsObj.points);
     setupCB("enableCards", constraintsObj.cards);
+
+    const dropdown = document.getElementById('whichOpponentForDist');
+    dropdown.addEventListener('change', (event) => {
+      const value = event.target.value;
+      if (DEBUG) console.log('whichOpponentForDist select called, new value= ' + value);
+      constraintsObj.dist.hand = value;
+    });
+
+    const dropdown2 = document.getElementById('whichMatchForDist');
+    dropdown2.addEventListener('change', (event) => {
+      const value = event.target.value;
+      if (DEBUG) console.log('whichMatchForDist select called, new value= ' + value);
+      constraintsObj.dist.mode = value;
+    });
+
+    const dropdown3 = document.getElementById('whichOpponentForPoints');
+    dropdown3.addEventListener('change', (event) => {
+      const value = event.target.value;
+      if (DEBUG) console.log('whichOpponentForPoints select called, new value= ' + value);
+      constraintsObj.dist.hand = value;
+    });
+
+    const dropdown4 = document.getElementById('whichMatchForPoints');
+    dropdown4.addEventListener('change', (event) => {
+      const value = event.target.value;
+      if (DEBUG) console.log('whichMatchForPoints select called, new value= ' + value);
+      constraintsObj.dist.mode = value;
+    });
   }
 
 function setupCB(id, obj) {
