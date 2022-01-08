@@ -80,56 +80,57 @@
     setupCB("enablePoints", constraintsObj.points);
     setupCB("enableCards", constraintsObj.cards);
 
-    const dropdown = document.getElementById('whichOpponentForDist');
-    dropdown.addEventListener('change', (event) => {
-      const value = event.target.value;
-      if (DEBUG) console.log('whichOpponentForDist select called, new value= ' + value);
-      constraintsObj.dist.hand = value;
-    });
+    setupDropdown('whichOpponentForDist', constraintsObj.dist, 'hand');
+    setupDropdown('whichMatchForDist', constraintsObj.dist, 'mode');
 
-    const dropdown2 = document.getElementById('whichMatchForDist');
-    dropdown2.addEventListener('change', (event) => {
-      const value = event.target.value;
-      if (DEBUG) console.log('whichMatchForDist select called, new value= ' + value);
-      constraintsObj.dist.mode = value;
-    });
+    setupDropdown('whichOpponentForPoints', constraintsObj.points, 'hand');
+    setupDropdown('whichMatchForPoints', constraintsObj.points, 'mode');
 
-    const dropdown3 = document.getElementById('whichOpponentForPoints');
-    dropdown3.addEventListener('change', (event) => {
-      const value = event.target.value;
-      if (DEBUG) console.log('whichOpponentForPoints select called, new value= ' + value);
-      constraintsObj.dist.hand = value;
-    });
+    // const dropdown3 = document.getElementById('whichOpponentForPoints');
+    // dropdown3.addEventListener('change', (event) => {
+    //   const value = event.target.value;
+    //   if (DEBUG) console.log('whichOpponentForPoints select called, new value= ' + value);
+    //   constraintsObj.dist.hand = value;
+    // });
 
-    const dropdown4 = document.getElementById('whichMatchForPoints');
-    dropdown4.addEventListener('change', (event) => {
-      const value = event.target.value;
-      if (DEBUG) console.log('whichMatchForPoints select called, new value= ' + value);
-      constraintsObj.dist.mode = value;
-    });
+    // const dropdown4 = document.getElementById('whichMatchForPoints');
+    // dropdown4.addEventListener('change', (event) => {
+    //   const value = event.target.value;
+    //   if (DEBUG) console.log('whichMatchForPoints select called, new value= ' + value);
+    //   constraintsObj.dist.mode = value;
+    // });
   }
 
-function setupCB(id, obj) {
-  const cb = document.getElementById(id);
-  const isChecked = cb.checked;
-  obj.check = isChecked;
-  cb.addEventListener('click', handleCB);
-  function handleCB(e) {
-    if (DEBUG) console.log('handleCB called for ' + id);
+  function setupCB(id, obj) {
     const cb = document.getElementById(id);
     const isChecked = cb.checked;
     obj.check = isChecked;
+    cb.addEventListener('click', handleCB);
+    function handleCB(e) {
+      if (DEBUG) console.log('handleCB called for ' + id);
+      const cb = document.getElementById(id);
+      const isChecked = cb.checked;
+      obj.check = isChecked;
+    }
   }
-}
 
-
-function updateUI(cardsStrInput) {
-  const cardsStrValue = (cardsStrInput && cardsStrInput.value) ? cardsStrInput.value : '';
-  if (cardsStrValue) {
-    const wholeArray = processInputString(cardsStrValue);
-    if (DEBUG) console.log('Whole Array:', wholeArray);
+  function setupDropdown(id, obj, field) {
+    const dropdown = document.getElementById(id);
+    dropdown.addEventListener('change', (event) => {
+      const value = event.target.value;
+      if (DEBUG) console.log('' + id + ' select called, new value= ' + value);
+      obj[field] = value;
+    });
   }
-}
+    
+
+  function updateUI(cardsStrInput) {
+    const cardsStrValue = (cardsStrInput && cardsStrInput.value) ? cardsStrInput.value : '';
+    if (cardsStrValue) {
+      const wholeArray = processInputString(cardsStrValue);
+      if (DEBUG) console.log('Whole Array:', wholeArray);
+    }
+  }
 
 
   function handleOutputBtn(e) {
