@@ -12,6 +12,11 @@
 
 .numcardsTextInput {
   width:30px;
+  text-align: center;
+}
+
+.cardsListInput {
+  text-align: center;
 }
 
 .indent22 {

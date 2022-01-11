@@ -40,7 +40,7 @@
               <select name="opponent" id="whichOpponentForDist">
                 <option>West</option>
                 <option>East</option>
-                <option>Both</option>
+                <option disabled>Both</option>
               </select>
               must have
               <select name="match" id="whichMatchForDist">
@@ -48,7 +48,7 @@
                 <option>at least</option>
                 <option>exactly</option>
               </select>
-              <input id="distCount" class="numcardsTextInput">
+              <input id="distCount" class="numcardsTextInput" disabled>
               cards
             </span>
             <br />
@@ -60,7 +60,7 @@
               <select name="opponent" id="whichOpponentForPoints">
                 <option>West</option>
                 <option>East</option>
-                <option>Both</option>
+                <option disabled>Both</option>
               </select>
               must have
               <select name="match" id="whichMatchForPoints">
@@ -68,7 +68,7 @@
                 <option>at least</option>
                 <option>exactly</option>
               </select>
-              <input id="pointsCount" class="numcardsTextInput">
+              <input id="pointsCount" class="numcardsTextInput" disabled>
               points
             </span>
             <br />
@@ -81,12 +81,12 @@
             <br />
             <span class="indent22">
               West must have at least these cards
-              <input id="westMustHaveCards">
+              <input id="westMustHaveCards" class="cardsListInput" disabled>
             </span>
             <br />
             <span class="indent22">
               East must have at least these cards
-              <input id="eastMustHaveCards">
+              <input id="eastMustHaveCards" class="cardsListInput" disabled>
             </span>
     </div>
 

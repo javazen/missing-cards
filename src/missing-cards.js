@@ -21,7 +21,7 @@
 
   // initial default state
   let constraintsObj = { 
-    dist:{check:false, hand:ANYHAND, mode:MODE_AT_MOST, count:2}, 
+    dist:{check:false, hand:WESTHAND, mode:MODE_AT_MOST, count:2}, 
     points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
     cards:{check:false, west:'K', east:'3'} };
   let origTableHTML;
@@ -82,23 +82,15 @@
 
     setupDropdown('whichOpponentForDist', constraintsObj.dist, 'hand');
     setupDropdown('whichMatchForDist', constraintsObj.dist, 'mode');
+    document.getElementById('distCount').value = constraintsObj.dist.count;
 
     setupDropdown('whichOpponentForPoints', constraintsObj.points, 'hand');
     setupDropdown('whichMatchForPoints', constraintsObj.points, 'mode');
+    document.getElementById('pointsCount').value = constraintsObj.points.count;
+    
+    document.getElementById('westMustHaveCards').value = constraintsObj.cards.west;
+    document.getElementById('eastMustHaveCards').value = constraintsObj.cards.east;
 
-    // const dropdown3 = document.getElementById('whichOpponentForPoints');
-    // dropdown3.addEventListener('change', (event) => {
-    //   const value = event.target.value;
-    //   if (DEBUG) console.log('whichOpponentForPoints select called, new value= ' + value);
-    //   constraintsObj.dist.hand = value;
-    // });
-
-    // const dropdown4 = document.getElementById('whichMatchForPoints');
-    // dropdown4.addEventListener('change', (event) => {
-    //   const value = event.target.value;
-    //   if (DEBUG) console.log('whichMatchForPoints select called, new value= ' + value);
-    //   constraintsObj.dist.mode = value;
-    // });
   }
 
   function setupCB(id, obj) {
@@ -111,11 +103,13 @@
       const cb = document.getElementById(id);
       const isChecked = cb.checked;
       obj.check = isChecked;
+      handleOutputBtn(e);
     }
   }
 
   function setupDropdown(id, obj, field) {
     const dropdown = document.getElementById(id);
+    dropdown.value = obj[field];
     dropdown.addEventListener('change', (event) => {
       const value = event.target.value;
       if (DEBUG) console.log('' + id + ' select called, new value= ' + value);
