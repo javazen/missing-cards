@@ -57,7 +57,7 @@
         outputBtn.click();
       }
     });
-    // after user stops typing, adjust the constraints
+    // after user stops typing, adjust the array of cards to analyze
     let timeout = null;
     inputField.addEventListener('keyup', function (e) {
       // Clear the timeout if it has already been set.
@@ -67,7 +67,7 @@
 
       // Make a new timeout set to go off in MILLISECONDS
       timeout = setTimeout(function () {
-          updateUI(inputField);
+        updateCardsArray(inputField);
       }, MILLISECONDS);
     });
 
@@ -82,11 +82,39 @@
 
     setupDropdown('whichOpponentForDist', constraintsObj.dist, 'hand');
     setupDropdown('whichMatchForDist', constraintsObj.dist, 'mode');
-    document.getElementById('distCount').value = constraintsObj.dist.count;
+    const distCount = document.getElementById('distCount');
+    distCount.value = constraintsObj.dist.count;
+    // after user stops typing, adjust the array of cards to analyze
+    let timeout2 = null;
+    distCount.addEventListener('keyup', function (e) {
+      // Clear the timeout if it has already been set.
+      // This will prevent the previous task from executing
+      // if it has been less than <MILLISECONDS>
+      clearTimeout(timeout2);
+
+      // Make a new timeout set to go off in MILLISECONDS
+      timeout2 = setTimeout(function () {
+        updateTextField(distCount, constraintsObj.dist, 'count');
+      }, MILLISECONDS);
+    });
 
     setupDropdown('whichOpponentForPoints', constraintsObj.points, 'hand');
     setupDropdown('whichMatchForPoints', constraintsObj.points, 'mode');
-    document.getElementById('pointsCount').value = constraintsObj.points.count;
+    const pointsCount = document.getElementById('pointsCount');
+    pointsCount.value = constraintsObj.points.count;
+    // after user stops typing, adjust the array of cards to analyze
+    let timeout3 = null;
+    pointsCount.addEventListener('keyup', function (e) {
+      // Clear the timeout if it has already been set.
+      // This will prevent the previous task from executing
+      // if it has been less than <MILLISECONDS>
+      clearTimeout(timeout3);
+
+      // Make a new timeout set to go off in MILLISECONDS
+      timeout3 = setTimeout(function () {
+        updateTextField(pointsCount, constraintsObj.points, 'count');
+      }, MILLISECONDS);
+    });
     
     document.getElementById('westMustHaveCards').value = constraintsObj.cards.west;
     document.getElementById('eastMustHaveCards').value = constraintsObj.cards.east;
@@ -118,11 +146,19 @@
   }
     
 
-  function updateUI(cardsStrInput) {
+  function updateCardsArray(cardsStrInput) {
     const cardsStrValue = (cardsStrInput && cardsStrInput.value) ? cardsStrInput.value : '';
     if (cardsStrValue) {
       const wholeArray = processInputString(cardsStrValue);
       if (DEBUG) console.log('Whole Array:', wholeArray);
+    }
+  }
+
+  function updateTextField(newText, obj, field) {
+    const newTextValue = (newText && newText.value) ? newText.value : '';
+    if (newTextValue) {
+      obj[field] = newTextValue;
+      if (DEBUG) console.log('field set to ', newTextValue);
     }
   }
 
