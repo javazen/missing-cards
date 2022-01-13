@@ -94,7 +94,7 @@
 
       // Make a new timeout set to go off in MILLISECONDS
       timeout2 = setTimeout(function () {
-        updateTextField(distCount, constraintsObj.dist, 'count');
+        updateTextField(distCount, constraintsObj.dist, 'count', e);
       }, MILLISECONDS);
     });
 
@@ -112,7 +112,7 @@
 
       // Make a new timeout set to go off in MILLISECONDS
       timeout3 = setTimeout(function () {
-        updateTextField(pointsCount, constraintsObj.points, 'count');
+        updateTextField(pointsCount, constraintsObj.points, 'count', e);
       }, MILLISECONDS);
     });
     
@@ -138,10 +138,11 @@
   function setupDropdown(id, obj, field) {
     const dropdown = document.getElementById(id);
     dropdown.value = obj[field];
-    dropdown.addEventListener('change', (event) => {
-      const value = event.target.value;
+    dropdown.addEventListener('change', (e) => {
+      const value = e.target.value;
       if (DEBUG) console.log('' + id + ' select called, new value= ' + value);
       obj[field] = value;
+      handleOutputBtn(e);
     });
   }
     
@@ -154,11 +155,20 @@
     }
   }
 
-  function updateTextField(newText, obj, field) {
+  // function updateWestCardsArray(westCardsStrInput) {
+  //   const westCardsStrValue = (westCardsStrInput && westCardsStrInput.value) ? westCardsStrInput.value : '';
+  //   if (westCardsStrValue) {
+  //     const wholeArray = processInputString(westCardsStrValue);
+  //     if (DEBUG) console.log('West cards array:', wholeArray);
+  //   }
+  // }
+
+  function updateTextField(newText, obj, field, e) {
     const newTextValue = (newText && newText.value) ? newText.value : '';
     if (newTextValue) {
       obj[field] = newTextValue;
       if (DEBUG) console.log('field set to ', newTextValue);
+      handleOutputBtn(e);
     }
   }
 
