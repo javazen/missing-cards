@@ -42,11 +42,10 @@
 
   function setup() {
     const outputBtn = document.getElementById("outputBtn");
-    outputBtn.addEventListener('click', handleOutputBtn);
+    outputBtn.addEventListener('click', updateResults);
     const outputTable = document.getElementById("outputTable");
     origTableHTML = outputTable.innerHTML;
 
-    
     // ENTER when within the cardsStr input should be equivalent to clicking the Output button
     const inputField = document.getElementById("cardsStr");
     inputField.addEventListener("keyup", function(e) {
@@ -116,9 +115,37 @@
       }, MILLISECONDS);
     });
     
-    document.getElementById('westMustHaveCards').value = constraintsObj.cards.west;
-    document.getElementById('eastMustHaveCards').value = constraintsObj.cards.east;
+    const westMustHaveCards = document.getElementById('westMustHaveCards');
+    westMustHaveCards.value = constraintsObj.cards.west;
+    // after user stops typing, adjust the cards West must have
+    let timeout4 = null;
+    westMustHaveCards.addEventListener('keyup', function (e) {
+      // Clear the timeout if it has already been set.
+      // This will prevent the previous task from executing
+      // if it has been less than <MILLISECONDS>
+      clearTimeout(timeout4);
 
+      // Make a new timeout set to go off in MILLISECONDS
+      timeout4 = setTimeout(function () {
+        updateWestCardsArray(westMustHaveCards);
+      }, MILLISECONDS);
+    });
+    
+    const eastMustHaveCards = document.getElementById('eastMustHaveCards');
+    eastMustHaveCards.value = constraintsObj.cards.east;
+    // after user stops typing, adjust the cards West must have
+    let timeout5 = null;
+    eastMustHaveCards.addEventListener('keyup', function (e) {
+      // Clear the timeout if it has already been set.
+      // This will prevent the previous task from executing
+      // if it has been less than <MILLISECONDS>
+      clearTimeout(timeout5);
+
+      // Make a new timeout set to go off in MILLISECONDS
+      timeout5 = setTimeout(function () {
+        updateEastCardsArray(eastMustHaveCards);
+      }, MILLISECONDS);
+    });
   }
 
   function setupCB(id, obj) {
@@ -131,7 +158,7 @@
       const cb = document.getElementById(id);
       const isChecked = cb.checked;
       obj.check = isChecked;
-      handleOutputBtn(e);
+      updateResults(e);
     }
   }
 
@@ -142,7 +169,7 @@
       const value = e.target.value;
       if (DEBUG) console.log('' + id + ' select called, new value= ' + value);
       obj[field] = value;
-      handleOutputBtn(e);
+      updateResults(e);
     });
   }
     
@@ -155,25 +182,32 @@
     }
   }
 
-  // function updateWestCardsArray(westCardsStrInput) {
-  //   const westCardsStrValue = (westCardsStrInput && westCardsStrInput.value) ? westCardsStrInput.value : '';
-  //   if (westCardsStrValue) {
-  //     const wholeArray = processInputString(westCardsStrValue);
-  //     if (DEBUG) console.log('West cards array:', wholeArray);
-  //   }
-  // }
+  function updateWestCardsArray(westCardsStrInput) {
+    const westCardsStrValue = (westCardsStrInput && westCardsStrInput.value) ? westCardsStrInput.value : '';
+    if (westCardsStrValue) {
+      const wholeArray = processInputString(westCardsStrValue);
+      if (DEBUG) console.log('West cards array:', wholeArray);
+    }
+  }
+  function updateEastCardsArray(eastCardsStrInput) {
+    const eastCardsStrValue = (eastCardsStrInput && eastCardsStrInput.value) ? eastCardsStrInput.value : '';
+    if (eastCardsStrValue) {
+      const wholeArray = processInputString(eastCardsStrValue);
+      if (DEBUG) console.log('East cards array:', wholeArray);
+    }
+  }
 
   function updateTextField(newText, obj, field, e) {
     const newTextValue = (newText && newText.value) ? newText.value : '';
     if (newTextValue) {
       obj[field] = newTextValue;
       if (DEBUG) console.log('field set to ', newTextValue);
-      handleOutputBtn(e);
+      updateResults(e);
     }
   }
 
 
-  function handleOutputBtn(e) {
+  function updateResults(e) {
     const cardsStrInput = document.getElementById("cardsStr");
     const cardsStrValue = (cardsStrInput && cardsStrInput.value) ? cardsStrInput.value : '';
     if (DEBUG) console.log(cardsStrValue);
