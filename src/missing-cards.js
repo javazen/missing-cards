@@ -392,7 +392,7 @@
     if (obj.check) {
       const hand = obj.hand;
       const mode = obj.mode;
-      const count = obj.count;
+      const count = +obj.count;
       if (mode === MODE_AT_MOST) {
         if (hand === WESTHAND) ok = rowObj.west[field] <= count;
         else if (hand === EASTHAND) ok = rowObj.east[field] <= count;
