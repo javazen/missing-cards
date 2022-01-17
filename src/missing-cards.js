@@ -127,7 +127,7 @@
 
       // Make a new timeout set to go off in MILLISECONDS
       timeout4 = setTimeout(function () {
-        updateWestCardsArray(westMustHaveCards);
+        updateTextField(westMustHaveCards, constraintsObj.cards, 'west', e, true);
       }, MILLISECONDS);
     });
     
@@ -143,7 +143,7 @@
 
       // Make a new timeout set to go off in MILLISECONDS
       timeout5 = setTimeout(function () {
-        updateEastCardsArray(eastMustHaveCards);
+        updateTextField(eastMustHaveCards, constraintsObj.cards, 'east', e, true);
       }, MILLISECONDS);
     });
   }
@@ -182,27 +182,15 @@
     }
   }
 
-  function updateWestCardsArray(westCardsStrInput) {
-    const westCardsStrValue = (westCardsStrInput && westCardsStrInput.value) ? westCardsStrInput.value : '';
-    if (westCardsStrValue) {
-      const wholeArray = processInputString(westCardsStrValue);
-      if (DEBUG) console.log('West cards array:', wholeArray);
-    }
-  }
-  function updateEastCardsArray(eastCardsStrInput) {
-    const eastCardsStrValue = (eastCardsStrInput && eastCardsStrInput.value) ? eastCardsStrInput.value : '';
-    if (eastCardsStrValue) {
-      const wholeArray = processInputString(eastCardsStrValue);
-      if (DEBUG) console.log('East cards array:', wholeArray);
-    }
-  }
-
-  function updateTextField(newText, obj, field, e) {
-    const newTextValue = (newText && newText.value) ? newText.value : '';
-    if (newTextValue) {
-      obj[field] = newTextValue;
-      if (DEBUG) console.log('field set to ', newTextValue);
-      updateResults(e);
+  function updateTextField(newText, obj, field, e, allowEmptyValue) {
+    if (newText) {
+      const doUpdate = newText.value || allowEmptyValue;
+      const newTextValue = (newText.value) ? newText.value : '';
+      if (doUpdate) {
+        obj[field] = newTextValue;
+        if (DEBUG) console.log('field set to ', newTextValue);
+        updateResults(e);
+      }
     }
   }
 
@@ -417,10 +405,10 @@
       const rowWestArr = rowObj.raw.westArr;
       const rowEastArr = rowObj.raw.eastArr;
       const westCardsOK = westArr.every(function(el) {
-        return rowWestArr.includes(el);
+        return (el === '') || rowWestArr.includes(el);
       });
       const eastCardsOK = eastArr.every(function(el) {
-        return rowEastArr.includes(el);
+        return (el === '') || rowEastArr.includes(el);
       });
       ok = ok && westCardsOK && eastCardsOK;
     }
