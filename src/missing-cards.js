@@ -6,7 +6,8 @@
   const DEBUG_ANALYZE_ROW = false;
   let TESTING = false;
   let CONSTRAINTS = true;
-  const MILLISECONDS = 1000;
+  const EDIT_WAIT_MILLISECONDS = 1000;
+  const ALLOW_EMPTY_VALUE = true;
 
   const WESTARR = 0;
   const EASTARR = 1;
@@ -20,10 +21,11 @@
   const MODE_EXACTLY = 'exactly';
 
   // initial default state
-  let constraintsObj = { 
+  let constraintsObj = {
+    missingCards:'K, 9, 3, 2',
     dist:{check:false, hand:WESTHAND, mode:MODE_AT_MOST, count:2}, 
     points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
-    cards:{check:false, west:'K', east:'3'} };
+    cards:{check:false, west:'', east:''} };
   let origTableHTML;
   let wholeArray;
   
@@ -41,34 +43,11 @@
   });
 
   function setup() {
-    const outputBtn = document.getElementById("outputBtn");
-    outputBtn.addEventListener('click', updateResults);
     const outputTable = document.getElementById("outputTable");
     origTableHTML = outputTable.innerHTML;
 
-    // ENTER when within the cardsStr input should be equivalent to clicking the Output button
     const inputField = document.getElementById("cardsStr");
-    inputField.addEventListener("keyup", function(e) {
-      e.preventDefault();
-      const isEnter = e.code === "Enter" || e.key === "Enter";
-      // e.which = e.which || e.keyCode; // old deprecated way
-      if (isEnter) {
-        outputBtn.click();
-      }
-    });
-    // after user stops typing, adjust the array of cards to analyze
-    let timeout = null;
-    inputField.addEventListener('keyup', function (e) {
-      // Clear the timeout if it has already been set.
-      // This will prevent the previous task from executing
-      // if it has been less than <MILLISECONDS>
-      clearTimeout(timeout);
-
-      // Make a new timeout set to go off in MILLISECONDS
-      timeout = setTimeout(function () {
-        updateCardsArray(inputField);
-      }, MILLISECONDS);
-    });
+    setupInputText(inputField, constraintsObj, 'missingCards');
 
     if (CONSTRAINTS) {
       document.getElementById('right-side').style.display = "block";
@@ -82,70 +61,20 @@
     setupDropdown('whichOpponentForDist', constraintsObj.dist, 'hand');
     setupDropdown('whichMatchForDist', constraintsObj.dist, 'mode');
     const distCount = document.getElementById('distCount');
-    distCount.value = constraintsObj.dist.count;
-    // after user stops typing, adjust the array of cards to analyze
-    let timeout2 = null;
-    distCount.addEventListener('keyup', function (e) {
-      // Clear the timeout if it has already been set.
-      // This will prevent the previous task from executing
-      // if it has been less than <MILLISECONDS>
-      clearTimeout(timeout2);
-
-      // Make a new timeout set to go off in MILLISECONDS
-      timeout2 = setTimeout(function () {
-        updateTextField(distCount, constraintsObj.dist, 'count', e);
-      }, MILLISECONDS);
-    });
+    setupInputText(distCount, constraintsObj.dist, 'count');
 
     setupDropdown('whichOpponentForPoints', constraintsObj.points, 'hand');
     setupDropdown('whichMatchForPoints', constraintsObj.points, 'mode');
     const pointsCount = document.getElementById('pointsCount');
-    pointsCount.value = constraintsObj.points.count;
-    // after user stops typing, adjust the array of cards to analyze
-    let timeout3 = null;
-    pointsCount.addEventListener('keyup', function (e) {
-      // Clear the timeout if it has already been set.
-      // This will prevent the previous task from executing
-      // if it has been less than <MILLISECONDS>
-      clearTimeout(timeout3);
-
-      // Make a new timeout set to go off in MILLISECONDS
-      timeout3 = setTimeout(function () {
-        updateTextField(pointsCount, constraintsObj.points, 'count', e);
-      }, MILLISECONDS);
-    });
+    setupInputText(pointsCount, constraintsObj.points, 'count');
     
     const westMustHaveCards = document.getElementById('westMustHaveCards');
-    westMustHaveCards.value = constraintsObj.cards.west;
-    // after user stops typing, adjust the cards West must have
-    let timeout4 = null;
-    westMustHaveCards.addEventListener('keyup', function (e) {
-      // Clear the timeout if it has already been set.
-      // This will prevent the previous task from executing
-      // if it has been less than <MILLISECONDS>
-      clearTimeout(timeout4);
-
-      // Make a new timeout set to go off in MILLISECONDS
-      timeout4 = setTimeout(function () {
-        updateTextField(westMustHaveCards, constraintsObj.cards, 'west', e, true);
-      }, MILLISECONDS);
-    });
+    setupInputText(westMustHaveCards, constraintsObj.cards, 'west', ALLOW_EMPTY_VALUE);
     
     const eastMustHaveCards = document.getElementById('eastMustHaveCards');
-    eastMustHaveCards.value = constraintsObj.cards.east;
-    // after user stops typing, adjust the cards West must have
-    let timeout5 = null;
-    eastMustHaveCards.addEventListener('keyup', function (e) {
-      // Clear the timeout if it has already been set.
-      // This will prevent the previous task from executing
-      // if it has been less than <MILLISECONDS>
-      clearTimeout(timeout5);
+    setupInputText(eastMustHaveCards, constraintsObj.cards, 'east', ALLOW_EMPTY_VALUE);
 
-      // Make a new timeout set to go off in MILLISECONDS
-      timeout5 = setTimeout(function () {
-        updateTextField(eastMustHaveCards, constraintsObj.cards, 'east', e, true);
-      }, MILLISECONDS);
-    });
+    updateResults();
   }
 
   function setupCB(id, obj) {
@@ -174,14 +103,25 @@
   }
     
 
-  function updateCardsArray(cardsStrInput) {
-    const cardsStrValue = (cardsStrInput && cardsStrInput.value) ? cardsStrInput.value : '';
-    if (cardsStrValue) {
-      const wholeArray = processInputString(cardsStrValue);
-      if (DEBUG) console.log('Whole Array:', wholeArray);
-    }
-  }
+  function setupInputText(inputElement, obj, field, allowEmptyValue) {
+    // set to initial value
+    inputElement.value = obj[field];
 
+    // after user stops typing, set and update
+    let timeout = null;
+    inputElement.addEventListener('keyup', function (e) {
+      // Clear the timeout if it has already been set.
+      // This will prevent the previous task from executing
+      // if it has been less than <EDIT_WAIT_MILLISECONDS>
+      clearTimeout(timeout);
+
+      // Make a new timeout set to go off in EDIT_WAIT_MILLISECONDS
+      timeout = setTimeout(function () {
+        updateTextField(inputElement, obj, field, e, allowEmptyValue);
+      }, EDIT_WAIT_MILLISECONDS);
+    });
+  }
+    
   function updateTextField(newText, obj, field, e, allowEmptyValue) {
     if (newText) {
       const doUpdate = newText.value || allowEmptyValue;
@@ -193,7 +133,6 @@
       }
     }
   }
-
 
   function updateResults(e) {
     const cardsStrInput = document.getElementById("cardsStr");
