@@ -130,7 +130,13 @@
         obj[field] = newTextValue;
         if (DEBUG) console.log('field set to ', newTextValue);
         updateResults(e);
+      } else {
+        // tried to blank a field which doesn't support empty string - 
+        // just go back to old value
+        newText.value = obj[field];
       }
+    } else {
+      if (DEBUG) console.log('updateTextField called without valid text field');
     }
   }
 
