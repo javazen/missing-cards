@@ -26,7 +26,7 @@
   const MODE_EXACTLY = 'exactly';
 
   // initial default state
-  let constraintsObj = {
+  let stateObj = {
     missingCards:'K, 9, 3, 2',
     dist:{check:false, mode:MODE_AT_MOST, count:3}, 
     points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
@@ -51,32 +51,24 @@
     const outputTable = document.getElementById("outputTable");
     origTableHTML = outputTable.innerHTML;
 
-    const inputField = document.getElementById("cardsStr");
-    setupInputText(inputField, constraintsObj, 'missingCards');
+    setupInputText('cardsStr', stateObj, 'missingCards');
 
     if (CONSTRAINTS) {
       document.getElementById('right-side').style.display = "block";
+      // setup UI from stateObj defaults, set handlers to allow changes
+      setupCB("enableDist", stateObj.dist);
+      setupDropdown('whichDistMode', stateObj.dist, 'mode');
+      setupInputText('distCount', stateObj.dist, 'count');
+
+      setupCB("enablePoints", stateObj.points);
+      setupDropdown('whichOpponentForPoints', stateObj.points, 'hand');
+      setupDropdown('whichMatchForPoints', stateObj.points, 'mode');
+      setupInputText('pointsCount', stateObj.points, 'count');
+
+      setupCB("enableCards", stateObj.cards);    
+      setupInputText('westMustHaveCards', stateObj.cards, 'west', ALLOW_EMPTY_VALUE);
+      setupInputText('eastMustHaveCards', stateObj.cards, 'east', ALLOW_EMPTY_VALUE);
     }
-
-    // fill constraintsObj from UI, set handlers to allow changes
-    setupCB("enableDist", constraintsObj.dist);
-    setupCB("enablePoints", constraintsObj.points);
-    setupCB("enableCards", constraintsObj.cards);
-
-    setupDropdown('whichDistMode', constraintsObj.dist, 'mode');
-    const distCount = document.getElementById('distCount');
-    setupInputText(distCount, constraintsObj.dist, 'count');
-
-    setupDropdown('whichOpponentForPoints', constraintsObj.points, 'hand');
-    setupDropdown('whichMatchForPoints', constraintsObj.points, 'mode');
-    const pointsCount = document.getElementById('pointsCount');
-    setupInputText(pointsCount, constraintsObj.points, 'count');
-    
-    const westMustHaveCards = document.getElementById('westMustHaveCards');
-    setupInputText(westMustHaveCards, constraintsObj.cards, 'west', ALLOW_EMPTY_VALUE);
-    
-    const eastMustHaveCards = document.getElementById('eastMustHaveCards');
-    setupInputText(eastMustHaveCards, constraintsObj.cards, 'east', ALLOW_EMPTY_VALUE);
 
     updateResults();
   }
@@ -107,8 +99,10 @@
   }
     
 
-  function setupInputText(inputElement, obj, field, allowEmptyValue) {
-    // set to initial value
+  function setupInputText(inputId, obj, field, allowEmptyValue) {
+    const inputElement = document.getElementById(inputId);
+
+    // initialize to default value
     inputElement.value = obj[field];
 
     // after user stops typing, set and update
@@ -152,7 +146,7 @@
       wholeArray = processInputString(cardsStrValue);
       const possiblesArray = getPossibilities(wholeArray);
       const outputRowsArray = getOutputRowsArray(wholeArray, possiblesArray);
-      const possibleOutputRowsArray = constrainPossibles(outputRowsArray, constraintsObj);
+      const possibleOutputRowsArray = constrainPossibles(outputRowsArray, stateObj);
       if (possiblesArray) listPossibilities(possibleOutputRowsArray);
     }
   }
@@ -190,14 +184,14 @@
     return newArray;
   }
   
-  // Remove all the rows that do not pass the tests in constraintsObj
-  function constrainPossibles(outputRowsArray, constraintsObj) {
+  // Remove all the rows that do not pass the tests in stateObj
+  function constrainPossibles(outputRowsArray, stateObj) {
     let newArray = outputRowsArray.slice();
-    if (CONSTRAINTS && constraintsObj) {
+    if (CONSTRAINTS && stateObj) {
       for (let i=outputRowsArray.length-1; i>=0; i--) {
         let row = outputRowsArray[i];
         let rowObj = analyzeRow(row);
-        if (!allowed(constraintsObj, rowObj)) {
+        if (!allowed(stateObj, rowObj)) {
           newArray.splice(i, 1);
         }
       }
@@ -317,10 +311,10 @@
     // console.log('min: dist= ' + rowObj.min.dist + ' points= ' + rowObj.min.points);
   }
   
-  function allowed(constraintsObj, rowObj) {
-    const distOK = allowedDist(constraintsObj.dist, rowObj, 'dist');
-    const pointsOK = allowedPoints(constraintsObj.points, rowObj, 'points');
-    const cardsOK = allowedGivenKnownCards(constraintsObj.cards, rowObj);
+  function allowed(stateObj, rowObj) {
+    const distOK = allowedDist(stateObj.dist, rowObj, 'dist');
+    const pointsOK = allowedPoints(stateObj.points, rowObj, 'points');
+    const cardsOK = allowedGivenKnownCards(stateObj.cards, rowObj);
     return distOK && pointsOK && cardsOK;
   }
     
@@ -472,7 +466,8 @@
 
 }());
 
-// let constraintsObj = { 
-//   dist:{check:true, hand:ANYHAND, mode:MODE_AT_MOST, count:2}, 
-//   points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
-//   cards:{check:true, west:'K', east:'3'} };
+// let stateObj = { 
+// missingCards:'K, 9, 3, 2',
+// dist:{check:false, mode:MODE_AT_MOST, count:3}, 
+// points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
+// cards:{check:false, west:'', east:''} };
