@@ -16,6 +16,11 @@
   const EASTHAND = 'East';
   const ANYHAND = 'Both';
 
+  const WEST_AT_MOST = 'West has at most';
+  const WEST_AT_LEAST = 'West has at least';
+  const EAST_AT_MOST = 'East has at most';
+  const EAST_AT_LEAST = 'East has at least';
+
   const MODE_AT_MOST = 'at most';
   const MODE_AT_LEAST = 'at least';
   const MODE_EXACTLY = 'exactly';
@@ -23,7 +28,7 @@
   // initial default state
   let constraintsObj = {
     missingCards:'K, 9, 3, 2',
-    dist:{check:false, hand:WESTHAND, mode:MODE_AT_MOST, count:2}, 
+    dist:{check:false, mode:MODE_AT_MOST, count:3}, 
     points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
     cards:{check:false, west:'', east:''} };
   let origTableHTML;
@@ -58,8 +63,7 @@
     setupCB("enablePoints", constraintsObj.points);
     setupCB("enableCards", constraintsObj.cards);
 
-    setupDropdown('whichOpponentForDist', constraintsObj.dist, 'hand');
-    setupDropdown('whichMatchForDist', constraintsObj.dist, 'mode');
+    setupDropdown('whichDistMode', constraintsObj.dist, 'mode');
     const distCount = document.getElementById('distCount');
     setupInputText(distCount, constraintsObj.dist, 'count');
 
@@ -314,13 +318,35 @@
   }
   
   function allowed(constraintsObj, rowObj) {
-    const distOK = allowedInternal(constraintsObj.dist, rowObj, 'dist');
-    const pointsOK = allowedInternal(constraintsObj.points, rowObj, 'points');
+    const distOK = allowedDist(constraintsObj.dist, rowObj, 'dist');
+    const pointsOK = allowedPoints(constraintsObj.points, rowObj, 'points');
     const cardsOK = allowedGivenKnownCards(constraintsObj.cards, rowObj);
     return distOK && pointsOK && cardsOK;
   }
     
-  function allowedInternal(obj, rowObj, field) {
+  function allowedDist(obj, rowObj, field) {
+    let ok = true;
+    if (obj.check) {
+      const count = +obj.count;
+      const mode = obj.mode;
+      if (mode === MODE_AT_MOST) {
+        ok = rowObj.west[field] <= count && rowObj.east[field] <= count;
+      } else if (mode === WEST_AT_MOST) {
+        ok = rowObj.west[field] <= count;
+      } else if (mode === WEST_AT_LEAST) {
+        ok = rowObj.west[field] >= count;
+      } else if (mode === EAST_AT_MOST) {
+        ok = rowObj.east[field] <= count;
+      } else if (mode === EAST_AT_LEAST) {
+        ok = rowObj.east[field] >= count;
+      } else {
+        if (DEBUG) console.log('allowedDist called with unsupported mode ' + mode);
+      }
+    }
+    return ok;
+  }
+  
+  function allowedPoints(obj, rowObj, field) {
     let ok = true;
     if (obj.check) {
       const hand = obj.hand;

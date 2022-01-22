@@ -36,16 +36,12 @@
                 <input type="checkbox" id="enableDist">
               </label>
                 Distribution:
-              <select name="opponent" id="whichOpponentForDist">
-                <option>West</option>
-                <option>East</option>
-                <option disabled>Both</option>
-              </select>
-              must have
-              <select name="match" id="whichMatchForDist">
-                <option>at most</option>
-                <option>at least</option>
-                <option>exactly</option>
+              <select name="opponent" id="whichDistMode">
+                <option value="at most">Neither has more than</option>
+                <option>West has at most</option>
+                <option>West has at least</option>
+                <option>East has at most</option>
+                <option>East has at least</option>
               </select>
               <input id="distCount" class="numcardsTextInput">
               cards
