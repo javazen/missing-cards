@@ -14,7 +14,7 @@
   
   const WESTHAND = 'West';
   const EASTHAND = 'East';
-  const ANYHAND = 'Both';
+  const ALL_HANDS = [WESTHAND, EASTHAND];
 
   const WEST_AT_MOST = 'West has at most';
   const WEST_AT_LEAST = 'West has at least';
@@ -264,34 +264,26 @@
     return newArray;
   }
 
+  function analyzeRow(row) {
+    const westArr = row[WESTARR];
+    const eastArr = row[EASTARR];
+    const rowObj = {
+      raw:{westArr:westArr, eastArr:eastArr},
+      west:{dist:westArr.length, points:countPoints(westArr)},
+      east:{dist:eastArr.length, points:countPoints(eastArr)}
+    };
+
+    if (DEBUG_ANALYZE_ROW) debugOutputRow(rowObj);
+    
+    return rowObj;
+  }
+
   const pointsArray = {
     'A': 4,
     'K': 3,
     'Q': 2,
     'J': 1
   };
-
-  function analyzeRow(row) {
-    let rowObj = {raw:{}};
-    const westArr = row[WESTARR];
-    const eastArr = row[EASTARR];
-    rowObj.raw.westArr = westArr;
-    rowObj.raw.eastArr = eastArr;
-
-    rowObj.west = {dist:westArr.length, points:0};
-    rowObj.east = {dist:eastArr.length, points:0};
-    rowObj.max = {dist:Math.max(rowObj.west.dist, rowObj.east.dist), points:0};
-    // rowObj.min = {dist:Math.min(rowObj.west.dist, rowObj.east.dist), points:0};
-
-    rowObj.west.points = countPoints(westArr);
-    rowObj.east.points = countPoints(eastArr);
-    rowObj.max.points = Math.max(rowObj.west.points, rowObj.east.points);
-    // rowObj.min.points = Math.min(rowObj.west.points, rowObj.east.points);
-
-    if (DEBUG_ANALYZE_ROW) debugOutputRow(rowObj);
-    
-    return rowObj;
-  }
 
   function countPoints(cardArr) {
     let totalPoints = 0;
@@ -307,8 +299,6 @@
     console.log('     row: westArr= ' + rowObj.raw.westArr + ' eastArr= ' + rowObj.raw.eastArr);
     console.log('W: dist= ' + rowObj.west.dist + ' points= ' + rowObj.west.points);
     console.log('E: dist= ' + rowObj.east.dist + ' points= ' + rowObj.east.points);
-    console.log('max: dist= ' + rowObj.max.dist + ' points= ' + rowObj.max.points);
-    // console.log('min: dist= ' + rowObj.min.dist + ' points= ' + rowObj.min.points);
   }
   
   function allowed(stateObj, rowObj) {
@@ -319,25 +309,21 @@
   }
     
   function allowedDist(obj, rowObj, field) {
-    let ok = true;
     if (obj.check) {
       const count = +obj.count;
       const mode = obj.mode;
-      if (mode === MODE_AT_MOST) {
-        ok = rowObj.west[field] <= count && rowObj.east[field] <= count;
-      } else if (mode === WEST_AT_MOST) {
-        ok = rowObj.west[field] <= count;
-      } else if (mode === WEST_AT_LEAST) {
-        ok = rowObj.west[field] >= count;
-      } else if (mode === EAST_AT_MOST) {
-        ok = rowObj.east[field] <= count;
-      } else if (mode === EAST_AT_LEAST) {
-        ok = rowObj.east[field] >= count;
-      } else {
-        if (DEBUG) console.log('allowedDist called with unsupported mode ' + mode);
+      switch (mode) {
+        case MODE_AT_MOST: return rowObj.west[field] <= count && rowObj.east[field] <= count;
+        case WEST_AT_MOST: return rowObj.west[field] <= count;
+        case WEST_AT_LEAST: return rowObj.west[field] >= count;
+        case EAST_AT_MOST: return rowObj.east[field] <= count;
+        case EAST_AT_LEAST: return rowObj.east[field] >= count;
+        default: 
+          if (DEBUG) console.log('allowedDist called with unsupported mode ' + mode);
+          // return true, checking against invalid is taken as not checking
       }
     }
-    return ok;
+    return true;
   }
   
   function allowedPoints(obj, rowObj, field) {
@@ -346,17 +332,23 @@
       const hand = obj.hand;
       const mode = obj.mode;
       const count = +obj.count;
+
+      // sanity check
+      if (!ALL_HANDS.includes(hand)) {
+        if (DEBUG) console.log('allowedPoints called with unsupported hand ' + hand);
+        return true;
+      }
+      const points = (hand === WESTHAND) ? rowObj.west[field] : rowObj.east[field];
+
       if (mode === MODE_AT_MOST) {
-        if (hand === WESTHAND) ok = rowObj.west[field] <= count;
-        else if (hand === EASTHAND) ok = rowObj.east[field] <= count;
-        else if (hand === ANYHAND) ok = rowObj.max[field] <= count;
+        ok = points <= count;
       } else if (mode === MODE_AT_LEAST) {
-        if (hand === WESTHAND) ok = rowObj.west[field] >= count;
-        else if (hand === EASTHAND) ok = rowObj.east[field] >= count;
-        else if (hand === ANYHAND) ok = rowObj.max[field] >= count;
+        ok = points >= count;
       } else if (mode === MODE_EXACTLY) {
-        if (hand === WESTHAND) ok = rowObj.west[field] === count;
-        else if (hand === EASTHAND) ok = rowObj.east[field] === count;
+        ok = points === count;
+      } else {
+        if (DEBUG) console.log('allowedPoints called with unsupported mode ' + mode);
+        return true;
       }
     }
     return ok;
