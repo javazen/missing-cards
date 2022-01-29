@@ -152,8 +152,11 @@
   }
   
   // returns array of cards that are missing
+  // will accept comma- or space-delimited lists of cards, but not a mixture
   function processInputString(str) {
-    let cardArray = str.split(',');
+    const useCommas = str.includes(',');
+    const delim = (useCommas) ? ',' : ' ';
+    let cardArray = str.split(delim);
     cardArray = cardArray.map( el => el.trim().toUpperCase() );
     
     return cardArray;
