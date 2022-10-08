@@ -27,7 +27,7 @@
 
   // initial default state
   let stateObj = {
-    missingCards:'K, 9, 3, 2',
+    missingCards:'K 9 3 2',
     dist:{check:false, mode:MODE_AT_MOST, count:3}, 
     points:{check:false, hand:WESTHAND, mode:MODE_AT_LEAST, count:3},
     cards:{check:false, west:'', east:''} };
