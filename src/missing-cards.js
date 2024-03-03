@@ -33,6 +33,7 @@
     cards:{check:false, west:'', east:''} };
   let origTableHTML;
   let wholeArray;
+  let copyToClipboardBtn;
   
   document.addEventListener("DOMContentLoaded", function(event) {
     if (TRACE) console.log('DOMContentLoaded');
@@ -52,7 +53,9 @@
     origTableHTML = outputTable.innerHTML;
 
     setupInputText('cardsStr', stateObj, 'missingCards');
-
+    copyToClipboardBtn = document.getElementById("copyToClipboard");
+    copyToClipboardBtn.addEventListener('click', handleCopyToClipboard);
+  
     if (CONSTRAINTS) {
       document.getElementById('right-side').style.display = "block";
       // setup UI from stateObj defaults, set handlers to allow changes
@@ -71,6 +74,42 @@
     }
 
     updateResults();
+  }
+
+  function handleCopyToClipboard(e) {
+    const tableContents = getTableContents("outputTable");
+    // console.log(tableContents);
+    writeClipboardText(tableContents);
+  }
+
+  // returns contents of the table in TSV format
+  // will not handle nested tables correctly
+  // ? inserts blank column between West and East ?
+  function getTableContents(table_id, separator = '\t') {
+    const tableBody = document.querySelector('#'+table_id);
+    const tableArr = [];
+    const rows = tableBody.querySelectorAll('tr');
+    for (let i=0; i<rows.length; i++) {
+      const rowArr = [];
+      // const cols = rows[i].querySelectorAll('tr'); // not sure why it does not work
+      const cols = rows[i].children;
+      for (let j=0; j<cols.length; j++) {
+        let data = cols[j].innerText;
+        rowArr.push(data);
+      }
+      const rowStr = rowArr.join(separator);
+      tableArr.push(rowStr);
+    }
+    return tableArr.join('\n');
+  }
+
+  async function writeClipboardText(text) {
+    copyToClipboardBtn.focus();
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.error(error.message);
+    }
   }
 
   function setupCB(id, obj) {
@@ -149,6 +188,7 @@
       const possibleOutputRowsArray = constrainPossibles(outputRowsArray, stateObj);
       if (possiblesArray) listPossibilities(possibleOutputRowsArray);
     }
+    // writeClipboardText(cardsStrValue);
   }
   
   // returns array of cards that are missing
