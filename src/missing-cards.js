@@ -94,7 +94,8 @@
       // const cols = rows[i].querySelectorAll('tr'); // not sure why it does not work
       const cols = rows[i].children;
       for (let j=0; j<cols.length; j++) {
-        let data = cols[j].innerText;
+        let data = cols[j].textContent;
+        // let data = cols[j].innerText;
         rowArr.push(data);
       }
       const rowStr = rowArr.join(separator);
