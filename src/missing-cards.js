@@ -423,7 +423,7 @@
     const ss = document.styleSheets;
     for (let i = 0; i < ss.length; i++) {
       const href = ss[i].href;
-      if (href.endsWith("mocha.css")) {
+      if (href?.endsWith("mocha.css")) {
         TESTING = true;
         break;
       }
